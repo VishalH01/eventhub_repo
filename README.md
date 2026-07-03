@@ -4,9 +4,9 @@ Welcome to the Event Management Platform! This project is a full-stack web appli
 
 ---
 
-## Current Status: Phase 6 Completed
+## Current Status: Phase 7 Completed
 
-We have successfully implemented **Phase 6: Event Registration (Book Ticket)** on both the backend and frontend.
+We have successfully implemented **Phase 7: Razorpay Payment Gateway Integration** on both the backend and frontend.
 
 ### Completed Features
 #### Phase 1: Backend Initialization
@@ -51,6 +51,13 @@ We have successfully implemented **Phase 6: Event Registration (Book Ticket)** o
 - **Secure Ownership Cancellation**: Created `DELETE /api/registrations/{id}` with strict verification checks to ensure users can only cancel their own bookings.
 - **Frontend Panel Integration**: Wired booking handlers in `EventDetails.jsx` and built a registrations manager layout in `MyRegistrations.jsx` supporting live API fetches, cancellations, and rendering visual attendance QR codes for `CONFIRMED` tickets.
 
+#### Phase 7: Razorpay Payment Gateway Integration
+- **SDK Dependency Integration**: Wired `com.razorpay:razorpay-java:1.4.9` in `pom.xml`.
+- **Properties Configured**: Set user's active API test keys and secrets inside `application.properties`.
+- **Order Initialization REST API**: Created `POST /api/payments/create-order/{registrationId}` to create transaction orders on Razorpay's server using their Java Client. Includes robust fallback simulation logic.
+- **Signature Verification API**: Created `POST /api/payments/verify/{registrationId}` to cryptographically verify payment integrity via SHA256 HMAC signature hashing. Confirms registration and stores successful transactions in MySQL.
+- **React Checkout Modal Integration**: Injected Razorpay's SDK checkout script dynamically in `MyRegistrations.jsx`, launching the checkout modal dialog with custom branding colors, prefills, and success triggers.
+
 ---
 
 ## Folder Structure
@@ -68,20 +75,27 @@ d:\Intern_Assign/
 │       │   ├── controller/
 │       │   │   ├── AuthController.java
 │       │   │   ├── EventController.java
-│       │   │   └── RegistrationController.java # Registration REST endpoints
+│       │   │   ├── RegistrationController.java
+│       │   │   └── PaymentController.java      # Payment Order & Verification endpoints
 │       │   ├── dto/
+│       │   │   ├── LoginRequest.java
+│       │   │   ├── RegisterRequest.java
+│       │   │   ├── AuthResponse.java
+│       │   │   └── PaymentRequest.java         # Razorpay transaction feedback DTO
 │       │   ├── entity/
 │       │   ├── repository/
 │       │   │   ├── RoleRepository.java
 │       │   │   ├── UserRepository.java
 │       │   │   ├── EventRepository.java
-│       │   │   └── RegistrationRepository.java # Booking queries layer
+│       │   │   ├── RegistrationRepository.java
+│       │   │   └── PaymentRepository.java      # Payments log query layer
 │       │   ├── security/
 │       │   └── service/
 │       │       ├── AuthService.java
 │       │       ├── EventService.java
 │       │       ├── RegistrationService.java
-│       │       └── RegistrationServiceImpl.java # Booking business logic
+│       │       ├── PaymentService.java
+│       │       └── PaymentServiceImpl.java     # Razorpay client & SHA256 verification
 │       └── main/resources/application.properties
 └── frontend/               # React JS frontend application
 ```
@@ -111,6 +125,12 @@ d:\Intern_Assign/
 | **POST** | `/api/registrations/book/{eventId}` | Books a pending ticket for an event | User | None | Registration JSON Object |
 | **GET** | `/api/registrations/my` | Fetches bookings list of the logged-in user | User | None | Registration JSON Array |
 | **DELETE** | `/api/registrations/{id}` | Cancels a registration booking | User | None | String message |
+
+### Payment APIs (`/api/payments`)
+| HTTP Method | Endpoint | Description | Access | Request Body (JSON) | Response Body (JSON) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **POST** | `/api/payments/create-order/{registrationId}` | Generates a unique Razorpay Order ID | User | None | `{"orderId": "order_..."}` |
+| **POST** | `/api/payments/verify/{registrationId}` | Validates SHA256 payment signature & confirms booking | User | `{"razorpayOrderId", "razorpayPaymentId", "razorpaySignature"}` | Registration JSON Object |
 
 ---
 
@@ -153,3 +173,4 @@ npm run dev
 * `feat: Phase 4 - Implement Spring Security & JWT Authentication`
 * `feat: Phase 5 - Implement Events CRUD REST APIs & Search Filters`
 * `feat: Phase 6 - Implement Event Registration (Book Ticket) APIs`
+* `feat: Phase 7 - Implement Razorpay Payment Gateway Integration`

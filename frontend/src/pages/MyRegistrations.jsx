@@ -8,6 +8,30 @@ function MyRegistrations() {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
+  // Retrieve user session info from localStorage for checkout prefilling
+  const userJson = localStorage.getItem('user');
+  const user = userJson ? JSON.parse(userJson) : null;
+
+  // 1. Dynamic Script Injection:
+  // Dynamically load the Razorpay Checkout SDK script inside the document body
+  // when this component mounts, and clean it up when the component unmounts.
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    // Fetch user registrations initially
+    fetchRegistrations();
+
+    return () => {
+      // Cleanup script on unmount
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
+
   // Fetch logged-in user's registrations from backend
   const fetchRegistrations = async () => {
     try {
@@ -21,9 +45,84 @@ function MyRegistrations() {
     }
   };
 
-  useEffect(() => {
-    fetchRegistrations();
-  }, []);
+  // 2. Handle Razorpay Checkout Payment Flow
+  const handlePaymentClick = async (registrationId, event) => {
+    setError('');
+    setSuccessMsg('');
+    try {
+      // Step A: Request our Spring Boot backend to initialize an order on Razorpay
+      const response = await API.post(`/payments/create-order/${registrationId}`);
+      const { orderId } = response.data; // Retrieve Order ID
+
+      // Step B: Check if the backend fell back to a simulated order ID
+      if (orderId.startsWith('order_simulated_')) {
+        alert('[Simulation Mode] Initiating simulated payment success. Click OK to confirm.');
+        
+        // POST simulated confirmation details to backend verification endpoint
+        await API.post(`/payments/verify/${registrationId}`, {
+          razorpayOrderId: orderId,
+          razorpayPaymentId: 'pay_simulated_' + Date.now(),
+          razorpaySignature: 'sig_simulated_dummy_hash'
+        });
+
+        setSuccessMsg('Payment simulated successfully! Your ticket is confirmed.');
+        fetchRegistrations();
+      } else {
+        // Step C: Trigger real Razorpay Checkout modal popup using user credentials
+        if (!window.Razorpay) {
+          alert('Razorpay Payment Gateway SDK failed to load. Please refresh the page.');
+          return;
+        }
+
+        const options = {
+          key: 'rzp_test_T95EFtiOkqEW3D', // Razorpay Test Key ID
+          amount: event.price * 100,      // Amount in Paise
+          currency: 'INR',
+          name: 'EventHub Tickets',
+          description: `Ticket Purchase for "${event.title}"`,
+          order_id: orderId,              // Linked Order ID
+          
+          // Handler Callback function: Triggered automatically by Razorpay when payment succeeds
+          handler: async function (paymentResponse) {
+            try {
+              // POST verification details (paymentId, orderId, signature) to Spring Boot
+              await API.post(`/payments/verify/${registrationId}`, {
+                razorpayOrderId: paymentResponse.razorpay_order_id,
+                razorpayPaymentId: paymentResponse.razorpay_payment_id,
+                razorpaySignature: paymentResponse.razorpay_signature
+              });
+
+              setSuccessMsg('Payment successful! Your ticket has been confirmed.');
+              fetchRegistrations(); // Refresh registrations to display QR Code
+            } catch (verErr) {
+              console.error(verErr);
+              setError(verErr.response?.data || 'Signature verification failed. Contact support.');
+            }
+          },
+          prefill: {
+            name: user ? user.name : '',
+            email: user ? user.email : ''
+          },
+          theme: {
+            color: '#4F46E5' // Indigo color theme matching the navbar
+          }
+        };
+
+        const razorpayPopup = new window.Razorpay(options);
+        
+        // Handle checkout failure events (e.g. payment failed / modal closed)
+        razorpayPopup.on('payment.failed', function (response) {
+          alert(`Payment Failed: ${response.error.description}`);
+        });
+
+        // Open checkout modal
+        razorpayPopup.open();
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data || 'Failed to initialize payment gateway.');
+    }
+  };
 
   // Handle cancellation request
   const handleCancelClick = async (id, eventTitle) => {
@@ -112,14 +211,14 @@ function MyRegistrations() {
                   {reg.status === 'PENDING' && (
                     <div className="flex gap-2">
                       <button
-                        onClick={() => alert(`Redirecting to Razorpay checkout for ticket price: ₹${reg.event.price}`)}
-                        className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded shadow-sm transition"
+                        onClick={() => handlePaymentClick(reg.id, reg.event)}
+                        className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition"
                       >
-                        Pay Now
+                        Pay Now (Razorpay)
                       </button>
                       <button
                         onClick={() => handleCancelClick(reg.id, reg.event.title)}
-                        className="px-3 py-1.5 border border-red-200 hover:bg-red-50 text-red-600 text-xs font-bold rounded transition"
+                        className="px-3.5 py-2 border border-red-200 hover:bg-red-50 text-red-600 text-xs font-bold rounded-lg transition"
                       >
                         Cancel Booking
                       </button>
