@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import API from '../services/api';
 
 function AdminDashboard() {
@@ -10,8 +11,6 @@ function AdminDashboard() {
   // State to hold list of events fetched from backend
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
 
   // Analytics stats state
   const [stats, setStats] = useState({
@@ -41,7 +40,7 @@ function AdminDashboard() {
       setEvents(response.data);
     } catch (err) {
       console.error(err);
-      setError('Failed to fetch events from server.');
+      toast.error('Failed to fetch events from server.');
     } finally {
       setLoading(false);
     }
@@ -54,7 +53,7 @@ function AdminDashboard() {
       setStats(response.data);
     } catch (err) {
       console.error(err);
-      setError('Failed to fetch dashboard metrics.');
+      toast.error('Failed to fetch dashboard metrics.');
     }
   };
 
@@ -84,10 +83,10 @@ function AdminDashboard() {
     try {
       if (editMode) {
         await API.put(`/events/${editingId}`, eventPayload);
-        setSuccessMsg('Event updated successfully!');
+        toast.success('Event updated successfully!');
       } else {
         await API.post('/events', eventPayload);
-        setSuccessMsg('Event created successfully!');
+        toast.success('Event created successfully!');
       }
 
       // Reset form states and refresh events list & stats counters
@@ -96,7 +95,7 @@ function AdminDashboard() {
       fetchStats();
     } catch (err) {
       console.error(err);
-      setError(err.response?.data || 'Failed to save event. Ensure all fields are valid.');
+      toast.error(err.response?.data || 'Failed to save event. Ensure all fields are valid.');
     }
   };
 
@@ -127,16 +126,14 @@ function AdminDashboard() {
     if (!window.confirm(`Are you sure you want to delete the event: "${title}"?`)) {
       return;
     }
-    setError('');
-    setSuccessMsg('');
     try {
       await API.delete(`/events/${id}`);
-      setSuccessMsg('Event deleted successfully!');
+      toast.success('Event deleted successfully!');
       fetchEvents();
       fetchStats(); // Update stats counts
     } catch (err) {
       console.error(err);
-      setError(err.response?.data || 'Failed to delete event.');
+      toast.error(err.response?.data || 'Failed to delete event.');
     }
   };
 
@@ -212,17 +209,7 @@ function AdminDashboard() {
 
       </div>
 
-      {/* Notifications */}
-      {successMsg && (
-        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-lg text-sm font-medium">
-          ✅ {successMsg}
-        </div>
-      )}
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-lg text-sm font-medium">
-          ⚠️ {error}
-        </div>
-      )}
+
 
       {/* Grid: Events List (Left) and Create/Edit Form (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
