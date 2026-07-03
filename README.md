@@ -199,6 +199,13 @@ npm run dev
 - **React Hot Toast Notifications**: Centralized toast notifications styled with Indigo theme accents for state changes (Login, Registration, Admin Catalog CRUD).
 - **Optimistic UI Updates**: Refactored payment verification handlers to merge response data directly into React states, loading the updated Paid status and QR codes instantly without needing page refreshes.
 
+#### Phase 11: Seating Layout Simulation & Interactive Seating Panel
+- **Seating Layout presets configuration**: Added seating configuration forms (Layout Preset selection: Standard, VIP Front, Center Walkway Aisle; Rows count 1-10; Columns count 1-12; and Venue Capacity N) inside the Admin Panel of `AdminDashboard.jsx`.
+- **Venue Layout Simulation Algorithm**: Created a grid generation algorithm that maps seat capacity into rows/columns. It colors the front rows gold for VIP presets, leaves space for walkway aisles, and disables any overflow grid positions beyond the configured capacity as structural unavailable cells (`×`).
+- **Interactive Light-Theme Seat Modal**: Built a clean visual overlay window in `SeatSelectionModal.jsx` representing screen orientation, seat legend indicators, interactive 3D grid, and live price invoice calculations.
+- **Multiple Seat Bookings**: Updated `bookEvent` in the backend database layer to check for collisions, parse list coordinates, and map them to comma-separated seats columns. Scaled payments and order invoices based on seat count.
+- **Dynamic Row/Seat Mapping**: Extracted unique row letters and seat numbers dynamically from selection lists, displaying them on screen and print passes. Enabled multiple registrations per event for buying seats in separate transactions.
+
 ---
 
 ## Git Commit History
@@ -212,3 +219,4 @@ npm run dev
 * `feat: Phase 8 - Implement dynamic QR Code Generator & Printable Ticket passes`
 * `feat: Phase 9 - Implement secure Admin Dashboard Analytics & Metrics cards`
 * `feat: Phase 10 - Integrate premium horizontal boarding pass ticket, toast notifications, confirmation overlay modals, and optimistic UI state synchronization`
+* `feat: Phase 11 - Implement seating layout simulation, interactive light-theme selection modals, and multiple bookings`
