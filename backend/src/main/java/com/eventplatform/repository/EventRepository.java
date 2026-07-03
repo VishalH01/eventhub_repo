@@ -22,4 +22,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
            " LOWER(e.description) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
            "(:category = 'All' OR e.category = :category)")
     List<Event> searchAndFilterEvents(@Param("search") String search, @Param("category") String category);
+
+    boolean existsByTitle(String title);
 }
