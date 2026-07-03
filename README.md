@@ -4,9 +4,9 @@ Welcome to the Event Management Platform! This project is a full-stack web appli
 
 ---
 
-## Current Status: Phase 5 Completed
+## Current Status: Phase 6 Completed
 
-We have successfully implemented **Phase 5: Events CRUD & Search/Filters** on both the backend and frontend.
+We have successfully implemented **Phase 6: Event Registration (Book Ticket)** on both the backend and frontend.
 
 ### Completed Features
 #### Phase 1: Backend Initialization
@@ -44,6 +44,13 @@ We have successfully implemented **Phase 5: Events CRUD & Search/Filters** on bo
 - **Frontend Event Details View**: Built a dedicated event page (`EventDetails.jsx`) loading detail logistics (Title, Description, Date/Time, Venue, Price) using React Router's path ID parameter.
 - **Admin CRUD Dashboard**: Implemented full event management in the Admin Dashboard, enabling admins to create, update, and delete events via reusable forms.
 
+#### Phase 6: Event Registration (Book Ticket)
+- **Ticket Booking API**: Created `POST /api/registrations/book/{eventId}` to dynamically reserve pending tickets. Extracted logged-in user context statelessly from Spring's Security principal.
+- **Duplicate Booking Prevention**: Built database existence checks returning clear validation responses if a user books the same event twice.
+- **Registrations Listing API**: Exposed `GET /api/registrations/my` to let logged-in users fetch their personalized ticketing list.
+- **Secure Ownership Cancellation**: Created `DELETE /api/registrations/{id}` with strict verification checks to ensure users can only cancel their own bookings.
+- **Frontend Panel Integration**: Wired booking handlers in `EventDetails.jsx` and built a registrations manager layout in `MyRegistrations.jsx` supporting live API fetches, cancellations, and rendering visual attendance QR codes for `CONFIRMED` tickets.
+
 ---
 
 ## Folder Structure
@@ -58,26 +65,23 @@ d:\Intern_Assign/
 │       ├── main/java/com/eventplatform/
 │       │   ├── EventPlatformApplication.java
 │       │   ├── config/
-│       │   │   ├── SecurityConfig.java     # Spring Security Filter Chain
-│       │   │   └── DataInitializer.java    # Seeds roles/users on startup
 │       │   ├── controller/
-│       │   │   ├── AuthController.java     # Auth API endpoints (POST /login, POST /register)
-│       │   │   └── EventController.java    # Event CRUD API endpoints (GET, POST, PUT, DELETE)
-│       │   ├── dto/                        # Request/Response Data Transfer Objects
-│       │   │   ├── LoginRequest.java
-│       │   │   ├── RegisterRequest.java
-│       │   │   └── AuthResponse.java
-│       │   ├── entity/                     # JPA Database Entity classes
-│       │   ├── repository/                 # Database Query Repository interfaces
+│       │   │   ├── AuthController.java
+│       │   │   ├── EventController.java
+│       │   │   └── RegistrationController.java # Registration REST endpoints
+│       │   ├── dto/
+│       │   ├── entity/
+│       │   ├── repository/
 │       │   │   ├── RoleRepository.java
 │       │   │   ├── UserRepository.java
-│       │   │   └── EventRepository.java    # Event custom JPQL query mapping
-│       │   ├── security/                   # JWT & UserDetails implementation
-│       │   └── service/                    # Business Logic layers
+│       │   │   ├── EventRepository.java
+│       │   │   └── RegistrationRepository.java # Booking queries layer
+│       │   ├── security/
+│       │   └── service/
 │       │       ├── AuthService.java
-│       │       ├── AuthServiceImpl.java
 │       │       ├── EventService.java
-│       │       └── EventServiceImpl.java
+│       │       ├── RegistrationService.java
+│       │       └── RegistrationServiceImpl.java # Booking business logic
 │       └── main/resources/application.properties
 └── frontend/               # React JS frontend application
 ```
@@ -100,6 +104,13 @@ d:\Intern_Assign/
 | **POST** | `/api/events` | Creates a new event | Admin | None | Event Object (excluding ID) | Event JSON Object |
 | **PUT** | `/api/events/{id}` | Updates properties of an existing event | Admin | None | Event Object (excluding ID) | Event JSON Object |
 | **DELETE** | `/api/events/{id}` | Deletes an event | Admin | None | None | String message |
+
+### Registration APIs (`/api/registrations`)
+| HTTP Method | Endpoint | Description | Access | Request Body (JSON) | Response Body (JSON) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **POST** | `/api/registrations/book/{eventId}` | Books a pending ticket for an event | User | None | Registration JSON Object |
+| **GET** | `/api/registrations/my` | Fetches bookings list of the logged-in user | User | None | Registration JSON Array |
+| **DELETE** | `/api/registrations/{id}` | Cancels a registration booking | User | None | String message |
 
 ---
 
@@ -141,3 +152,4 @@ npm run dev
 * `feat: Phase 3 - Design Database Schema & Create JPA Entity Classes`
 * `feat: Phase 4 - Implement Spring Security & JWT Authentication`
 * `feat: Phase 5 - Implement Events CRUD REST APIs & Search Filters`
+* `feat: Phase 6 - Implement Event Registration (Book Ticket) APIs`

@@ -31,14 +31,22 @@ function EventDetails() {
     fetchEventDetails();
   }, [id]);
 
-  const handleRegisterClick = () => {
+  const handleRegisterClick = async () => {
     if (!isLoggedIn) {
       alert('Please log in to register for events!');
       navigate('/login');
       return;
     }
-    // Proceed to registration flow
-    alert(`Registering for: ${event.title}`);
+
+    try {
+      // POST registration details for this event
+      await API.post(`/registrations/book/${event.id}`);
+      alert('Ticket booked successfully! Redirecting to your dashboard.');
+      navigate('/my-registrations');
+    } catch (err) {
+      const errMsg = err.response?.data || 'Failed to book this ticket.';
+      alert(typeof errMsg === 'string' ? errMsg : 'Booking failed.');
+    }
   };
 
   if (loading) {
