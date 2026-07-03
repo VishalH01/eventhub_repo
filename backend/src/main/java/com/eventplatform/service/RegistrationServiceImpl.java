@@ -37,12 +37,6 @@ public class RegistrationServiceImpl implements RegistrationService {
             throw new RuntimeException("Please select at least one seat to book!");
         }
 
-        // Step A: Check if the user has already booked a ticket for this event.
-        // Prevent duplicate bookings to ensure fair access to tickets.
-        if (registrationRepository.existsByUserEmailAndEventId(email, eventId)) {
-            throw new RuntimeException("You have already registered for this event!");
-        }
-
         // Step B: Look up the user entity by email.
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
