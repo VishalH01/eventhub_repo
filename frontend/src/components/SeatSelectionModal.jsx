@@ -39,42 +39,42 @@ function SeatSelectionModal({
   const totalAmount = selectedSeats.length * ticketPrice;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-300">
-      <div className="bg-white border border-slate-100 rounded-3xl shadow-2xl max-w-4xl w-full flex flex-col md:flex-row overflow-hidden animate-scale-up max-h-[90vh]">
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 transition-all duration-300">
+      <div className="bg-white border border-slate-100 rounded-3xl shadow-2xl max-w-4xl w-full flex flex-col md:flex-row overflow-y-auto md:overflow-hidden animate-scale-up max-h-[95vh] md:max-h-[90vh]">
         
         {/* Left Side: Seat Layout Grid */}
-        <div className="flex-1 p-8 flex flex-col justify-between overflow-y-auto bg-white">
+        <div className="flex-1 p-5 md:p-8 flex flex-col justify-between overflow-y-auto bg-white min-h-[450px] md:min-h-0">
           <div>
-            <div className="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
+            <div className="flex justify-between items-center mb-6 md:mb-8 border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-xl font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
+                <h3 className="text-lg md:text-xl font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
                   <span>🎟️</span> Choose Your Seats
                 </h3>
-                <p className="text-xs text-slate-500 mt-1.5 font-medium">Click on available seats to toggle selection. Red indicates occupied.</p>
+                <p className="text-[10px] md:text-xs text-slate-500 mt-1 font-medium">Click on available seats to toggle selection. Red indicates occupied.</p>
               </div>
               <button 
                 onClick={onClose}
-                className="text-slate-500 hover:text-slate-800 text-xs font-bold px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-xl transition duration-150"
+                className="text-slate-500 hover:text-slate-800 text-[10px] md:text-xs font-bold px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-xl transition duration-150"
               >
                 ✕ Close
               </button>
             </div>
 
             {/* Stage Screen representation */}
-            <div className="w-full flex flex-col items-center mb-10">
-              <div className="w-3/4 h-2 bg-gradient-to-r from-indigo-300 via-indigo-650 to-indigo-300 bg-indigo-600 rounded-full shadow-[0_6px_24px_rgba(99,102,241,0.3)]"></div>
-              <span className="text-[10px] font-black text-indigo-500 tracking-[0.4em] uppercase mt-3">STAGE / SCREEN VIEW</span>
+            <div className="w-full flex flex-col items-center mb-6 md:mb-10">
+              <div className="w-3/4 h-1.5 md:h-2 bg-gradient-to-r from-indigo-300 via-indigo-655 to-indigo-300 bg-indigo-600 rounded-full shadow-[0_4px_16px_rgba(99,102,241,0.25)]"></div>
+              <span className="text-[9px] md:text-[10px] font-black text-indigo-500 tracking-[0.3em] md:tracking-[0.4em] uppercase mt-2.5">STAGE / SCREEN VIEW</span>
             </div>
 
             {/* Grid Container */}
-            <div className="flex flex-col gap-3.5 items-center justify-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden py-4 bg-slate-50/50 p-6 rounded-2xl border border-slate-150 max-w-full">
+            <div className="flex flex-col gap-2 md:gap-3.5 items-center justify-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden py-3 md:py-4 bg-slate-55 bg-slate-50/50 p-3 md:p-6 rounded-2xl border border-slate-150 max-w-full">
               {rows.map((rowLabel, rIndex) => {
                 return (
-                  <div key={rowLabel} className="flex gap-3 items-center min-w-max">
+                  <div key={rowLabel} className="flex gap-2 md:gap-3 items-center min-w-max">
                     {/* Row Label Left */}
-                    <span className="w-6 text-center text-xs font-black text-slate-400 tracking-wider">{rowLabel}</span>
+                    <span className="w-5 text-center text-[10px] md:text-xs font-black text-slate-400 tracking-wider">{rowLabel}</span>
                     
-                    <div className="flex gap-2.5 items-center">
+                    <div className="flex gap-1.5 md:gap-2.5 items-center">
                       {cols.map((colNum, cIndex) => {
                         const seatCode = `${rowLabel}-${colNum}`;
                         const seatIndex = rIndex * colsCount + cIndex;
@@ -86,7 +86,7 @@ function SeatSelectionModal({
                         const isSelected = selectedSeats.includes(seatCode);
 
                         // Styling states for premium look
-                        let seatClass = "w-8 h-8 rounded-lg border text-[10px] font-extrabold transition-all duration-150 flex items-center justify-center hover:scale-110 active:scale-95 shadow-sm ";
+                        let seatClass = "w-7 h-7 md:w-8 md:h-8 rounded-lg border text-[9px] md:text-[10px] font-extrabold transition-all duration-150 flex items-center justify-center hover:scale-110 active:scale-95 shadow-sm ";
                         
                         if (isBlocked) {
                           seatClass += "bg-slate-100/50 border-slate-100 text-slate-300 cursor-not-allowed select-none shadow-none hover:scale-100";
@@ -104,8 +104,8 @@ function SeatSelectionModal({
                           <React.Fragment key={seatCode}>
                             {/* Render visual aisle space */}
                             {aisleIndex > 0 && cIndex === aisleIndex && (
-                              <div className="w-8 h-8 flex items-center justify-center select-none mx-1.5">
-                                <span className="text-[8px] font-black text-slate-400 tracking-[0.25em] uppercase rotate-90">AISLE</span>
+                              <div className="w-6 h-7 md:w-8 md:h-8 flex items-center justify-center select-none mx-0.5 md:mx-1.5">
+                                <span className="text-[7px] md:text-[8px] font-black text-slate-400 tracking-[0.2em] md:tracking-[0.25em] uppercase rotate-90">AISLE</span>
                               </div>
                             )}
 
@@ -124,7 +124,7 @@ function SeatSelectionModal({
                     </div>
 
                     {/* Row Label Right */}
-                    <span className="w-6 text-center text-xs font-black text-slate-400 tracking-wider">{rowLabel}</span>
+                    <span className="w-5 text-center text-[10px] md:text-xs font-black text-slate-400 tracking-wider">{rowLabel}</span>
                   </div>
                 );
               })}
@@ -132,26 +132,26 @@ function SeatSelectionModal({
           </div>
 
           {/* Grid Legends */}
-          <div className="mt-8 pt-6 border-t border-slate-100 flex flex-wrap gap-5 justify-center text-xs text-slate-500 font-medium">
-            <div className="flex items-center gap-2">
+          <div className="mt-6 md:mt-8 pt-4 md:pt-6 border-t border-slate-100 flex flex-wrap gap-3 md:gap-5 justify-center text-[10px] md:text-xs text-slate-500 font-medium">
+            <div className="flex items-center gap-1.5">
               <span className="w-3.5 h-3.5 bg-white border border-slate-200 rounded-md"></span>
               <span>Available Standard</span>
             </div>
             {layout === 'VIP_FRONT' && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <span className="w-3.5 h-3.5 bg-amber-50 border border-amber-250 rounded-md"></span>
                 <span className="text-amber-700 font-bold">Available VIP</span>
               </div>
             )}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <span className="w-3.5 h-3.5 bg-indigo-600 rounded-md"></span>
               <span className="text-indigo-600 font-bold">Selected</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <span className="w-3.5 h-3.5 bg-red-50 border border-red-200 rounded-md flex items-center justify-center text-red-400 text-[8px] font-black">•</span>
-              <span className="text-red-555 text-red-650">Occupied</span>
+              <span className="text-red-650">Occupied</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <span className="w-3.5 h-3.5 bg-slate-100/50 border border-slate-100 rounded-md flex items-center justify-center text-slate-350 text-[8px]">×</span>
               <span className="text-slate-400">Unavailable</span>
             </div>
@@ -159,19 +159,19 @@ function SeatSelectionModal({
         </div>
 
         {/* Right Side: Booking Summary Panel */}
-        <div className="w-full md:w-80 bg-slate-55 bg-slate-50/70 p-8 border-t md:border-t-0 md:border-l border-slate-150 flex flex-col justify-between">
+        <div className="w-full md:w-80 bg-slate-50/70 p-5 md:p-8 border-t md:border-t-0 md:border-l border-slate-150 flex flex-col justify-between shrink-0">
           <div>
-            <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Booking Details</h4>
-            <div className="space-y-5">
+            <h4 className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4 md:mb-6">Booking Details</h4>
+            <div className="space-y-4 md:space-y-5">
               <div className="bg-white p-4 rounded-2xl border border-slate-200/60 shadow-sm">
                 <span className="block text-[8px] font-black text-slate-400 uppercase tracking-widest">Selected Event</span>
-                <span className="text-sm font-extrabold text-slate-700 mt-1.5 block leading-snug">{event.title}</span>
+                <span className="text-xs md:text-sm font-extrabold text-slate-700 mt-1 block leading-snug">{event.title}</span>
               </div>
 
               <div className="bg-white p-4 rounded-2xl border border-slate-200/60 shadow-sm flex justify-between items-center">
                 <div>
                   <span className="block text-[8px] font-black text-slate-400 uppercase tracking-widest font-mono">Seats Chosen</span>
-                  <div className="flex flex-wrap gap-1 mt-2">
+                  <div className="flex flex-wrap gap-1 mt-1.5">
                     {selectedSeats.length > 0 ? (
                       selectedSeats.map(seat => (
                         <span key={seat} className="px-2 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 text-[9px] font-black rounded-md tracking-wider">
@@ -179,25 +179,25 @@ function SeatSelectionModal({
                         </span>
                       ))
                     ) : (
-                      <span className="text-slate-450 text-xs italic font-medium">No selection</span>
+                      <span className="text-slate-400 text-xs italic font-medium">No selection</span>
                     )}
                   </div>
                 </div>
                 <div className="text-right">
                   <span className="block text-[8px] font-black text-slate-400 uppercase tracking-widest">Count</span>
-                  <span className="text-base font-extrabold text-slate-700 mt-1 block">{selectedSeats.length}</span>
+                  <span className="text-sm md:text-base font-extrabold text-slate-700 mt-1 block">{selectedSeats.length}</span>
                 </div>
               </div>
 
               {/* Price Details */}
-              <div className="space-y-3 px-1 text-sm font-medium text-slate-500">
-                <div className="flex justify-between text-xs">
+              <div className="space-y-2 md:space-y-3 px-1 text-xs md:text-sm font-medium text-slate-500">
+                <div className="flex justify-between text-[11px] md:text-xs">
                   <span>Price per ticket</span>
                   <span className="font-semibold text-slate-700">₹{ticketPrice.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between border-t border-slate-200/80 pt-3 text-slate-800 font-extrabold">
+                <div className="flex justify-between border-t border-slate-200/80 pt-2.5 md:pt-3 text-slate-800 font-extrabold">
                   <span>Total Invoice</span>
-                  <span className="text-indigo-600 font-black text-xl">
+                  <span className="text-indigo-600 font-black text-lg md:text-xl">
                     ₹{totalAmount.toFixed(2)}
                   </span>
                 </div>
@@ -205,17 +205,17 @@ function SeatSelectionModal({
             </div>
           </div>
 
-          <div className="mt-8 space-y-3">
+          <div className="mt-6 md:mt-8 space-y-2 md:space-y-3">
             <button
               onClick={onConfirm}
               disabled={selectedSeats.length === 0}
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-250 disabled:text-slate-400 text-white font-bold rounded-2xl shadow-md disabled:shadow-none transition-all duration-150 text-sm flex items-center justify-center gap-2"
+              className="w-full py-2.5 md:py-3 bg-indigo-600 hover:bg-indigo-750 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold rounded-2xl shadow-md disabled:shadow-none transition-all duration-150 text-xs md:text-sm flex items-center justify-center gap-2"
             >
               🎟️ Confirm Seats & Book
             </button>
             <button
               onClick={onClose}
-              className="w-full py-2.5 border border-slate-250 hover:bg-slate-100 bg-white text-slate-500 font-semibold rounded-2xl text-xs transition duration-150"
+              className="w-full py-2 border border-slate-200 hover:bg-slate-100 bg-white text-slate-500 font-semibold rounded-2xl text-[10px] md:text-xs transition duration-150"
             >
               Cancel Selection
             </button>
