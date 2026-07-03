@@ -3,6 +3,7 @@ import React from 'react';
 // Routes: A container for all the individual Route paths in our app.
 // Route: Defines a mapping between a specific URL path and the React component it should render.
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 
 // Import our custom Layout wrapper
 import Layout from './components/Layout';
@@ -20,6 +21,19 @@ function App() {
   return (
     // Wrap the entire application in the Router so routing functions work anywhere inside it.
     <Router>
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          className: 'font-sans text-sm font-semibold text-slate-800 bg-white border border-slate-100 rounded-xl shadow-lg',
+          duration: 4000,
+          success: {
+            iconTheme: {
+              primary: '#4F46E5',
+              secondary: '#FFFFFF',
+            },
+          },
+        }} 
+      />
       {/* The Layout component wraps every page, providing a consistent Navbar and Footer */}
       <Layout>
         {/* Routes will match the current browser URL and render the corresponding element */}
