@@ -97,78 +97,93 @@ function EventDetails() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4">
+    <div className="max-w-6xl mx-auto py-4 px-4">
       {/* Back Link */}
-      <Link to="/events" className="text-slate-500 hover:text-indigo-600 text-sm font-semibold transition flex items-center gap-1.5 mb-6">
+      <Link to="/events" className="text-slate-500 hover:text-indigo-600 text-xs font-semibold transition flex items-center gap-1.5 mb-4">
         ← Back to Events Feed
       </Link>
 
-      {/* Detail Layout */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-150 overflow-hidden">
-        {/* Banner Image */}
-        {event.imageUrl ? (
-          <img
-            src={event.imageUrl}
-            alt={event.title}
-            className="w-full h-80 object-cover"
-          />
-        ) : (
-          <div className="w-full h-64 bg-slate-100 flex items-center justify-center text-6xl">📅</div>
-        )}
-
-        {/* Content Box */}
-        <div className="p-8">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700">
-              {event.category}
-            </span>
-            <span className="text-sm font-mono text-slate-400">Event ID: {event.id}</span>
-          </div>
-
-          <h1 className="mt-4 text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight leading-tight">
-            {event.title}
-          </h1>
-
-          {/* Logistics Box */}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-5 rounded-xl border border-slate-100">
-            <div>
-              <p className="text-xs uppercase tracking-wider font-semibold text-slate-400">Date & Time</p>
-              <p className="mt-1 font-bold text-slate-800">
-                📅 {new Date(event.date).toLocaleDateString(undefined, {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'})}
-              </p>
-              <p className="text-sm text-slate-500 font-medium">
-                🕒 {new Date(event.date).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})}
-              </p>
+      {/* Detail Layout: Responsive two-column grid */}
+      <div className="flex flex-col md:flex-row gap-6 items-stretch">
+        
+        {/* Left Column: Event Information (occupies 60% width) */}
+        <div className="flex-[6] bg-white rounded-2xl border border-slate-150 p-6 flex flex-col justify-between shadow-sm">
+          <div>
+            <div className="flex items-center gap-3">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 uppercase tracking-wider">
+                {event.category}
+              </span>
+              <span className="text-xs font-mono text-slate-400">ID: #{event.id}</span>
             </div>
-            <div>
-              <p className="text-xs uppercase tracking-wider font-semibold text-slate-400">Event Venue</p>
-              <p className="mt-1 font-bold text-slate-800">📍 {event.location}</p>
+
+            <h1 className="mt-4 text-2xl md:text-3xl font-black text-slate-800 tracking-tight leading-snug">
+              {event.title}
+            </h1>
+
+            {/* Description box: Compact and scrollable for very long text, keeping page height fixed */}
+            <div className="mt-6 border-t border-slate-100 pt-5">
+              <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider mb-2">About the Event</h3>
+              <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-line max-h-56 overflow-y-auto pr-2 scrollbar-thin">
+                {event.description}
+              </div>
             </div>
           </div>
 
-          {/* Description */}
-          <div className="mt-8 border-t border-slate-100 pt-6">
-            <h3 className="text-lg font-bold text-slate-800">About the Event</h3>
-            <p className="mt-3 text-slate-600 leading-relaxed whitespace-pre-line">
-              {event.description}
-            </p>
+          <div className="mt-6 border-t border-slate-100 pt-4 text-[10px] font-semibold text-slate-400">
+            Make sure to read seating terms before selecting coordinates.
+          </div>
+        </div>
+
+        {/* Right Column: Transaction & Action Card (occupies 40% width / fixed w-96) */}
+        <div className="w-full md:w-[380px] bg-white rounded-2xl border border-slate-150 p-5 shadow-sm flex flex-col justify-between">
+          <div>
+            {/* Event Image Banner */}
+            <div className="w-full h-44 rounded-xl overflow-hidden mb-5 bg-slate-100 border border-slate-100 shadow-inner">
+              {event.imageUrl ? (
+                <img
+                  src={event.imageUrl}
+                  alt={event.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-4xl">📅</div>
+              )}
+            </div>
+
+            {/* Logistics Grid */}
+            <div className="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-150">
+              <div>
+                <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Date & Schedule</span>
+                <p className="mt-0.5 text-xs font-bold text-slate-700">
+                  📅 {new Date(event.date).toLocaleDateString(undefined, {weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'})}
+                </p>
+                <p className="text-[11px] text-slate-500 font-medium">
+                  🕒 {new Date(event.date).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})}
+                </p>
+              </div>
+              
+              <div>
+                <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Location / Venue</span>
+                <p className="mt-0.5 text-xs font-bold text-slate-700">📍 {event.location}</p>
+              </div>
+            </div>
           </div>
 
-          {/* Footer Action Card */}
-          <div className="mt-10 border-t border-slate-100 pt-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          {/* Pricing and Action button */}
+          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold text-slate-500">Ticket Price</p>
-              <p className="text-3xl font-black text-slate-800">₹{event.price.toFixed(2)}</p>
+              <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Ticket Price</span>
+              <span className="text-2xl font-black text-slate-800">₹{event.price.toFixed(2)}</span>
             </div>
             <button
               onClick={handleRegisterClick}
-              className="w-full md:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-md transition duration-150 ease-in-out text-center"
+              className="flex-1 py-3 bg-indigo-650 hover:bg-indigo-700 bg-indigo-600 text-white font-bold rounded-xl shadow-md transition duration-150 text-xs text-center uppercase tracking-wider"
             >
               Select Seats & Register
             </button>
           </div>
-
         </div>
+
       </div>
 
       {/* Interactive Seat Selection Modal Window */}
