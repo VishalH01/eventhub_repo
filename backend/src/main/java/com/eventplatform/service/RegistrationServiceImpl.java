@@ -3,11 +3,14 @@ package com.eventplatform.service;
 import com.eventplatform.entity.Event;
 import com.eventplatform.entity.Registration;
 import com.eventplatform.entity.User;
+import com.eventplatform.entity.Payment;
 import com.eventplatform.repository.EventRepository;
 import com.eventplatform.repository.RegistrationRepository;
 import com.eventplatform.repository.UserRepository;
+import com.eventplatform.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,6 +26,9 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Autowired
     private EventRepository eventRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
 
     @Override
     public Registration bookEvent(Long eventId, String email) {
@@ -89,20 +95,24 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
+    @Transactional
     public void cancelRegistration(Long id, String email) {
         // Step A: Find the target registration record.
         Registration registration = registrationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Registration booking not found with ID: " + id));
 
         // Step B: Crucial Security Check!
-        // Validate that the email of the user who owns this booking record matches the
-        // email of the currently authenticated caller requesting the cancellation.
-        // This prevents malicious users from deleting other users' bookings.
         if (!registration.getUser().getEmail().equals(email)) {
             throw new RuntimeException("Access denied: You do not have permission to cancel this booking!");
         }
 
-        // Step C: Delete registration from the database.
+        // Step C: Manually delete child Payment record if it exists to prevent MySQL constraint violation.
+        Payment payment = registration.getPayment();
+        if (payment != null) {
+            paymentRepository.delete(payment);
+        }
+
+        // Step D: Delete registration from the database.
         registrationRepository.delete(registration);
     }
 }

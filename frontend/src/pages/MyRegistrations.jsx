@@ -56,14 +56,15 @@ function MyRegistrations() {
         toast.loading('Confirming simulated transaction...', { id: 'payment' });
         
         // POST simulated confirmation details to backend verification endpoint
-        await API.post(`/payments/verify/${registrationId}`, {
+        const verifyRes = await API.post(`/payments/verify/${registrationId}`, {
           razorpayOrderId: orderId,
           razorpayPaymentId: 'pay_simulated_' + Date.now(),
           razorpaySignature: 'sig_simulated_dummy_hash'
         });
 
         toast.success('Payment simulated successfully! Your ticket is confirmed.', { id: 'payment' });
-        fetchRegistrations();
+        // Update React registrations state list immediately with the updated record returned from backend
+        setRegistrations(prev => prev.map(reg => reg.id === registrationId ? verifyRes.data : reg));
       } else {
         // Step C: Trigger real Razorpay Checkout modal popup using user credentials
         if (!window.Razorpay) {
@@ -83,14 +84,15 @@ function MyRegistrations() {
           handler: async function (paymentResponse) {
             try {
               // POST verification details (paymentId, orderId, signature) to Spring Boot
-              await API.post(`/payments/verify/${registrationId}`, {
+              const verifyRes = await API.post(`/payments/verify/${registrationId}`, {
                 razorpayOrderId: paymentResponse.razorpay_order_id,
                 razorpayPaymentId: paymentResponse.razorpay_payment_id,
                 razorpaySignature: paymentResponse.razorpay_signature
               });
 
               toast.success('Payment successful! Your ticket has been confirmed.');
-              fetchRegistrations(); // Refresh registrations to display QR Code
+              // Update React registrations state list immediately with the updated record returned from backend
+              setRegistrations(prev => prev.map(reg => reg.id === registrationId ? verifyRes.data : reg));
             } catch (verErr) {
               console.error(verErr);
               toast.error(verErr.response?.data || 'Signature verification failed. Contact support.');
