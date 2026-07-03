@@ -64,7 +64,28 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Override
     public List<Registration> getMyRegistrations(String email) {
         // Fetch all bookings associated with the authenticated user's email.
-        return registrationRepository.findByUserEmail(email);
+        List<Registration> registrations = registrationRepository.findByUserEmail(email);
+        
+        // Populate transient QR code Base64 string for any confirmed booking ticket
+        registrations.forEach(this::populateQrCode);
+        
+        return registrations;
+    }
+
+    // Helper method to dynamically generate QR code Base64 text if the booking status is CONFIRMED.
+    private void populateQrCode(Registration reg) {
+        if ("CONFIRMED".equalsIgnoreCase(reg.getStatus())) {
+            // String formatting to build the payload stored inside the entry barcode
+            String qrContent = "Registration Code: " + reg.getRegistrationNumber() + "\n" +
+                               "Attendee: " + reg.getUser().getName() + "\n" +
+                               "Event: " + reg.getEvent().getTitle() + "\n" +
+                               "Date: " + reg.getEvent().getDate() + "\n" +
+                               "Venue: " + reg.getEvent().getLocation();
+            
+            // Generate QR code PNG bytes and convert to Base64 (200x200 pixels)
+            String base64Image = com.eventplatform.util.QrCodeGenerator.generateQrCodeBase64(qrContent, 200, 200);
+            reg.setQrCodeBase64(base64Image);
+        }
     }
 
     @Override

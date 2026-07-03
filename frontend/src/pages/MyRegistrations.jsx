@@ -124,6 +124,91 @@ function MyRegistrations() {
     }
   };
 
+  // Open a new printable viewport representing the ticket voucher card and trigger print
+  const handleDownloadTicket = (reg) => {
+    const printWindow = window.open('', '_blank', 'width=800,height=650');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Ticket Voucher - ${reg.registrationNumber}</title>
+          <style>
+            body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 40px; color: #334155; background-color: #f8fafc; }
+            .ticket-card { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 30px; max-width: 500px; margin: 0 auto; background: #fff; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
+            .header { text-align: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; }
+            .logo { font-size: 24px; font-weight: bold; color: #4F46E5; margin-bottom: 5px; }
+            .title { font-size: 22px; font-weight: 800; color: #1e293b; margin: 15px 0 5px 0; text-align: center; }
+            .meta-row { display: flex; justify-content: space-between; margin: 15px 0; font-size: 14px; }
+            .meta-col { flex: 1; }
+            .meta-label { font-weight: 600; color: #94a3b8; text-transform: uppercase; font-size: 9px; letter-spacing: 0.05em; }
+            .meta-val { font-weight: 700; color: #334155; margin-top: 2px; }
+            .qr-sec { text-align: center; margin-top: 25px; padding-top: 20px; border-top: 2px solid #f1f5f9; }
+            .qr-img { width: 140px; height: 140px; border: 1px solid #e2e8f0; padding: 5px; border-radius: 8px; }
+            .footer-msg { text-align: center; font-size: 10px; color: #94a3b8; margin-top: 15px; font-weight: 500; }
+            @media print {
+              body { padding: 0; background: none; }
+              .ticket-card { box-shadow: none; border: 2px solid #000; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="ticket-card">
+            <div class="header">
+              <div class="logo">🎟️ EventHub Boarding Pass</div>
+              <div style="font-size: 11px; color: #10b981; font-weight: bold; text-transform: uppercase;">Ticket Status: CONFIRMED</div>
+            </div>
+            
+            <div class="title">${reg.event.title}</div>
+            
+            <div class="meta-row">
+              <div class="meta-col">
+                <div class="meta-label">Ticket Number</div>
+                <div class="meta-val">${reg.registrationNumber}</div>
+              </div>
+              <div class="meta-col" style="text-align: right;">
+                <div class="meta-label">Attendee Name</div>
+                <div class="meta-val">${user ? user.name : 'Attendee'}</div>
+              </div>
+            </div>
+            
+            <div class="meta-row">
+              <div class="meta-col">
+                <div class="meta-label">Event Date & Time</div>
+                <div class="meta-val">${new Date(reg.event.date).toLocaleDateString(undefined, {weekday: 'long', month: 'short', day: 'numeric', year: 'numeric'})}</div>
+              </div>
+              <div class="meta-col" style="text-align: right;">
+                <div class="meta-label">Venue Location</div>
+                <div class="meta-val">📍 ${reg.event.location}</div>
+              </div>
+            </div>
+
+            <div class="meta-row">
+              <div class="meta-col">
+                <div class="meta-label">Category</div>
+                <div class="meta-val">${reg.event.category}</div>
+              </div>
+              <div class="meta-col" style="text-align: right;">
+                <div class="meta-label">Price Paid</div>
+                <div class="meta-val">INR ${reg.event.price.toFixed(2)}</div>
+              </div>
+            </div>
+            
+            <div class="qr-sec">
+              <img class="qr-img" src="data:image/png;base64,${reg.qrCodeBase64}" alt="Entry Pass QR" />
+              <div class="footer-msg">Present this barcode at the entry gate for scanning verification.</div>
+            </div>
+          </div>
+          <script>
+            window.onload = function() {
+              window.print();
+              setTimeout(function() { window.close(); }, 500);
+            }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   // Handle cancellation request
   const handleCancelClick = async (id, eventTitle) => {
     if (!window.confirm(`Are you sure you want to cancel your booking for "${eventTitle}"?`)) {
@@ -231,13 +316,18 @@ function MyRegistrations() {
               <div className="w-full md:w-auto flex flex-col items-center justify-center p-4 bg-slate-50 rounded-xl border border-slate-100 min-w-[180px]">
                 {reg.status === 'CONFIRMED' ? (
                   <>
-                    {/* Render visual QR Code containing the unique booking registration code */}
+                    {/* Render dynamic backend-generated Base64 QR code image */}
                     <img 
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${reg.registrationNumber}`} 
+                      src={`data:image/png;base64,${reg.qrCodeBase64}`} 
                       alt="Ticket QR Code" 
                       className="w-28 h-28 bg-white p-1 rounded-lg border border-slate-200"
                     />
-                    <span className="mt-2.5 text-[10px] font-mono text-slate-400">Scan at Entry Gate</span>
+                    <button
+                      onClick={() => handleDownloadTicket(reg)}
+                      className="mt-3.5 px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg transition"
+                    >
+                      Print Ticket PDF
+                    </button>
                   </>
                 ) : (
                   <div className="text-center p-3">

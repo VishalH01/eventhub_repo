@@ -82,6 +82,12 @@
 			<artifactId>razorpay-java</artifactId>
 			<version>1.4.9</version>
 		</dependency>
+		<!-- Google ZXing QR Code Generation Library -->
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>javase</artifactId>
+			<version>3.5.4</version>
+		</dependency>
 	</dependencies>
 
 	<build>

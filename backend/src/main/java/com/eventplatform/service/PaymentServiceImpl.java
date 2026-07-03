@@ -129,6 +129,15 @@ public class PaymentServiceImpl implements PaymentService {
 
         paymentRepository.save(payment);
 
+        // Step D: Populate the transient QR code string immediately for instant UI feedback
+        String qrContent = "Registration Code: " + registration.getRegistrationNumber() + "\n" +
+                           "Attendee: " + registration.getUser().getName() + "\n" +
+                           "Event: " + registration.getEvent().getTitle() + "\n" +
+                           "Date: " + registration.getEvent().getDate() + "\n" +
+                           "Venue: " + registration.getEvent().getLocation();
+        String base64Image = com.eventplatform.util.QrCodeGenerator.generateQrCodeBase64(qrContent, 200, 200);
+        registration.setQrCodeBase64(base64Image);
+
         return registration;
     }
 }

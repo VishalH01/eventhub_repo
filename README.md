@@ -4,9 +4,9 @@ Welcome to the Event Management Platform! This project is a full-stack web appli
 
 ---
 
-## Current Status: Phase 7 Completed
+## Current Status: Phase 8 Completed
 
-We have successfully implemented **Phase 7: Razorpay Payment Gateway Integration** on both the backend and frontend.
+We have successfully implemented **Phase 8: QR Code Generator & Ticket Generation** on both the backend and frontend.
 
 ### Completed Features
 #### Phase 1: Backend Initialization
@@ -58,6 +58,12 @@ We have successfully implemented **Phase 7: Razorpay Payment Gateway Integration
 - **Signature Verification API**: Created `POST /api/payments/verify/{registrationId}` to cryptographically verify payment integrity via SHA256 HMAC signature hashing. Confirms registration and stores successful transactions in MySQL.
 - **React Checkout Modal Integration**: Injected Razorpay's SDK checkout script dynamically in `MyRegistrations.jsx`, launching the checkout modal dialog with custom branding colors, prefills, and success triggers.
 
+#### Phase 8: QR Code Generator & Ticket Generation
+- **ZXing QR Engine Dependency**: Added `com.google.zxing:javase:3.5.4` to generate barcodes natively on the server.
+- **Hibernate Transient Field**: Mapped a `@Transient` field `qrCodeBase64` inside `Registration.java` to dynamically carry image payloads to the client without modifying the MySQL table columns.
+- **Base64 Image Utility**: Built `QrCodeGenerator.java` to encode QR code bit matrices containing booking ticket codes, attendee names, and event schedules into Base64 PNG strings.
+- **Printable Boarding Pass**: Added print handlers in `MyRegistrations.jsx` that dynamically open a formatted ticket invoice window and execute the browser's native `window.print()` command.
+
 ---
 
 ## Folder Structure
@@ -73,29 +79,13 @@ d:\Intern_Assign/
 │       │   ├── EventPlatformApplication.java
 │       │   ├── config/
 │       │   ├── controller/
-│       │   │   ├── AuthController.java
-│       │   │   ├── EventController.java
-│       │   │   ├── RegistrationController.java
-│       │   │   └── PaymentController.java      # Payment Order & Verification endpoints
 │       │   ├── dto/
-│       │   │   ├── LoginRequest.java
-│       │   │   ├── RegisterRequest.java
-│       │   │   ├── AuthResponse.java
-│       │   │   └── PaymentRequest.java         # Razorpay transaction feedback DTO
 │       │   ├── entity/
 │       │   ├── repository/
-│       │   │   ├── RoleRepository.java
-│       │   │   ├── UserRepository.java
-│       │   │   ├── EventRepository.java
-│       │   │   ├── RegistrationRepository.java
-│       │   │   └── PaymentRepository.java      # Payments log query layer
 │       │   ├── security/
+│       │   ├── util/
+│       │   │   └── QrCodeGenerator.java    # ZXing QR Code PNG generator
 │       │   └── service/
-│       │       ├── AuthService.java
-│       │       ├── EventService.java
-│       │       ├── RegistrationService.java
-│       │       ├── PaymentService.java
-│       │       └── PaymentServiceImpl.java     # Razorpay client & SHA256 verification
 │       └── main/resources/application.properties
 └── frontend/               # React JS frontend application
 ```
@@ -174,3 +164,4 @@ npm run dev
 * `feat: Phase 5 - Implement Events CRUD REST APIs & Search Filters`
 * `feat: Phase 6 - Implement Event Registration (Book Ticket) APIs`
 * `feat: Phase 7 - Implement Razorpay Payment Gateway Integration`
+* `feat: Phase 8 - Implement dynamic QR Code Generator & Printable Ticket passes`

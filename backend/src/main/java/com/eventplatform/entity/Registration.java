@@ -2,6 +2,7 @@ package com.eventplatform.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -127,5 +128,19 @@ public class Registration {
 
     public void setPayment(Payment payment) {
         this.payment = payment;
+    }
+
+    // @Transient: Tells Hibernate/JPA that this field does NOT correspond to a column in our MySQL 'registrations' table.
+    // Keeping this field transient is a database design best practice because storing large Base64 image strings in
+    // MySQL rows is highly inefficient. Instead, we generate the QR code dynamically in Java and serialize it to JSON.
+    @Transient
+    private String qrCodeBase64;
+
+    public String getQrCodeBase64() {
+        return qrCodeBase64;
+    }
+
+    public void setQrCodeBase64(String qrCodeBase64) {
+        this.qrCodeBase64 = qrCodeBase64;
     }
 }
