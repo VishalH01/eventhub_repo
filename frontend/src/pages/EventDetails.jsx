@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 // useParams extracts parameters from the route path (e.g. /events/:id -> useParams().id).
 // useNavigate is used to programmatically redirect users.
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import API from '../services/api';
 
 function EventDetails() {
@@ -33,7 +34,7 @@ function EventDetails() {
 
   const handleRegisterClick = async () => {
     if (!isLoggedIn) {
-      alert('Please log in to register for events!');
+      toast.error('Please log in to register for events!');
       navigate('/login');
       return;
     }
@@ -41,11 +42,15 @@ function EventDetails() {
     try {
       // POST registration details for this event
       await API.post(`/registrations/book/${event.id}`);
-      alert('Ticket booked successfully! Redirecting to your dashboard.');
-      navigate('/my-registrations');
+      toast.success('Ticket booked successfully! Redirecting to your dashboard...');
+      
+      // Delay navigation slightly so user sees the success checkmark
+      setTimeout(() => {
+        navigate('/my-registrations');
+      }, 1500);
     } catch (err) {
       const errMsg = err.response?.data || 'Failed to book this ticket.';
-      alert(typeof errMsg === 'string' ? errMsg : 'Booking failed.');
+      toast.error(typeof errMsg === 'string' ? errMsg : 'Booking failed.');
     }
   };
 

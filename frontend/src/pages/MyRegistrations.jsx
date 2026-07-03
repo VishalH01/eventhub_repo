@@ -6,8 +6,6 @@ import EventTicket from '../components/EventTicket';
 function MyRegistrations() {
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
 
   // Retrieve user session info from localStorage for checkout prefilling
   const userJson = localStorage.getItem('user');
@@ -40,7 +38,7 @@ function MyRegistrations() {
       setRegistrations(response.data);
     } catch (err) {
       console.error(err);
-      setError('Failed to load your event registrations from server.');
+      toast.error('Failed to load your event registrations from server.');
     } finally {
       setLoading(false);
     }
@@ -48,8 +46,6 @@ function MyRegistrations() {
 
   // 2. Handle Razorpay Checkout Payment Flow
   const handlePaymentClick = async (registrationId, event) => {
-    setError('');
-    setSuccessMsg('');
     try {
       // Step A: Request our Spring Boot backend to initialize an order on Razorpay
       const response = await API.post(`/payments/create-order/${registrationId}`);
@@ -57,7 +53,7 @@ function MyRegistrations() {
 
       // Step B: Check if the backend fell back to a simulated order ID
       if (orderId.startsWith('order_simulated_')) {
-        alert('[Simulation Mode] Initiating simulated payment success. Click OK to confirm.');
+        toast.loading('Confirming simulated transaction...', { id: 'payment' });
         
         // POST simulated confirmation details to backend verification endpoint
         await API.post(`/payments/verify/${registrationId}`, {
@@ -66,12 +62,12 @@ function MyRegistrations() {
           razorpaySignature: 'sig_simulated_dummy_hash'
         });
 
-        setSuccessMsg('Payment simulated successfully! Your ticket is confirmed.');
+        toast.success('Payment simulated successfully! Your ticket is confirmed.', { id: 'payment' });
         fetchRegistrations();
       } else {
         // Step C: Trigger real Razorpay Checkout modal popup using user credentials
         if (!window.Razorpay) {
-          alert('Razorpay Payment Gateway SDK failed to load. Please refresh the page.');
+          toast.error('Razorpay Payment Gateway SDK failed to load. Please refresh the page.');
           return;
         }
 
@@ -93,11 +89,11 @@ function MyRegistrations() {
                 razorpaySignature: paymentResponse.razorpay_signature
               });
 
-              setSuccessMsg('Payment successful! Your ticket has been confirmed.');
+              toast.success('Payment successful! Your ticket has been confirmed.');
               fetchRegistrations(); // Refresh registrations to display QR Code
             } catch (verErr) {
               console.error(verErr);
-              setError(verErr.response?.data || 'Signature verification failed. Contact support.');
+              toast.error(verErr.response?.data || 'Signature verification failed. Contact support.');
             }
           },
           prefill: {
@@ -113,7 +109,7 @@ function MyRegistrations() {
         
         // Handle checkout failure events (e.g. payment failed / modal closed)
         razorpayPopup.on('payment.failed', function (response) {
-          alert(`Payment Failed: ${response.error.description}`);
+          toast.error(`Payment Failed: ${response.error.description}`);
         });
 
         // Open checkout modal
@@ -121,7 +117,7 @@ function MyRegistrations() {
       }
     } catch (err) {
       console.error(err);
-      setError(err.response?.data || 'Failed to initialize payment gateway.');
+      toast.error(err.response?.data || 'Failed to initialize payment gateway.');
     }
   };
 
@@ -210,20 +206,45 @@ function MyRegistrations() {
     printWindow.document.close();
   };
 
-  // Handle cancellation request
-  const handleCancelClick = async (id, eventTitle) => {
-    if (!window.confirm(`Are you sure you want to cancel your booking for "${eventTitle}"?`)) {
-      return;
-    }
-    setError('');
-    setSuccessMsg('');
+  // Handle cancellation request via custom floating confirm toast
+  const handleCancelClick = (id, eventTitle) => {
+    toast((t) => (
+      <div className="flex flex-col gap-3 p-1">
+        <p className="text-slate-800 text-sm leading-relaxed">
+          Are you sure you want to cancel your booking for <strong>"{eventTitle}"</strong>?
+        </p>
+        <div className="flex gap-2 justify-end">
+          <button 
+            onClick={async () => {
+              toast.dismiss(t.id);
+              await executeCancel(id);
+            }}
+            className="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg shadow-sm transition"
+          >
+            Yes, Cancel
+          </button>
+          <button 
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3.5 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-bold rounded-lg transition"
+          >
+            No
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 6000,
+      position: 'top-center'
+    });
+  };
+
+  const executeCancel = async (id) => {
     try {
       await API.delete(`/registrations/${id}`);
-      setSuccessMsg('Booking cancelled successfully!');
+      toast.success('Booking cancelled successfully!');
       fetchRegistrations(); // Refresh list
     } catch (err) {
       console.error(err);
-      setError(err.response?.data || 'Failed to cancel registration.');
+      toast.error(err.response?.data || 'Failed to cancel registration.');
     }
   };
 
@@ -243,17 +264,7 @@ function MyRegistrations() {
         <p className="mt-2 text-slate-500">View your ticket history, payment status, and download attendance QR codes.</p>
       </div>
 
-      {/* Notifications */}
-      {successMsg && (
-        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-lg text-sm font-medium">
-          ✅ {successMsg}
-        </div>
-      )}
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-lg text-sm font-medium">
-          ⚠️ {error}
-        </div>
-      )}
+
 
       {/* Registrations List */}
       {registrations.length > 0 ? (
