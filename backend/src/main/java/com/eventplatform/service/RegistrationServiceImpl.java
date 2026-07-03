@@ -109,6 +109,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         // Step C: Manually delete child Payment record if it exists to prevent MySQL constraint violation.
         Payment payment = registration.getPayment();
         if (payment != null) {
+            payment.setRegistration(null);
+            registration.setPayment(null);
             paymentRepository.delete(payment);
         }
 

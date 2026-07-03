@@ -6,6 +6,9 @@ import EventTicket from '../components/EventTicket';
 function MyRegistrations() {
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [cancelTargetId, setCancelTargetId] = useState(null);
+  const [cancelTargetTitle, setCancelTargetTitle] = useState('');
 
   // Retrieve user session info from localStorage for checkout prefilling
   const userJson = localStorage.getItem('user');
@@ -64,7 +67,7 @@ function MyRegistrations() {
 
         toast.success('Payment simulated successfully! Your ticket is confirmed.', { id: 'payment' });
         // Update React registrations state list immediately with the updated record returned from backend
-        setRegistrations(prev => prev.map(reg => reg.id === registrationId ? verifyRes.data : reg));
+        setRegistrations(prev => prev.map(reg => reg.id === registrationId ? { ...reg, status: 'CONFIRMED', qrCodeBase64: verifyRes.data.qrCodeBase64 } : reg));
       } else {
         // Step C: Trigger real Razorpay Checkout modal popup using user credentials
         if (!window.Razorpay) {
@@ -92,7 +95,7 @@ function MyRegistrations() {
 
               toast.success('Payment successful! Your ticket has been confirmed.');
               // Update React registrations state list immediately with the updated record returned from backend
-              setRegistrations(prev => prev.map(reg => reg.id === registrationId ? verifyRes.data : reg));
+              setRegistrations(prev => prev.map(reg => reg.id === registrationId ? { ...reg, status: 'CONFIRMED', qrCodeBase64: verifyRes.data.qrCodeBase64 } : reg));
             } catch (verErr) {
               console.error(verErr);
               toast.error(verErr.response?.data || 'Signature verification failed. Contact support.');
@@ -256,35 +259,11 @@ function MyRegistrations() {
     printWindow.document.close();
   };
 
-  // Handle cancellation request via custom floating confirm toast
+  // Handle cancellation request via custom modal
   const handleCancelClick = (id, eventTitle) => {
-    toast((t) => (
-      <div className="flex flex-col gap-3 p-1">
-        <p className="text-slate-800 text-sm leading-relaxed">
-          Are you sure you want to cancel your booking for <strong>"{eventTitle}"</strong>?
-        </p>
-        <div className="flex gap-2 justify-end">
-          <button 
-            onClick={async () => {
-              toast.dismiss(t.id);
-              await executeCancel(id);
-            }}
-            className="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg shadow-sm transition"
-          >
-            Yes, Cancel
-          </button>
-          <button 
-            onClick={() => toast.dismiss(t.id)}
-            className="px-3.5 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-bold rounded-lg transition"
-          >
-            No
-          </button>
-        </div>
-      </div>
-    ), {
-      duration: 6000,
-      position: 'top-center'
-    });
+    setCancelTargetId(id);
+    setCancelTargetTitle(eventTitle);
+    setShowConfirmModal(true);
   };
 
   const executeCancel = async (id) => {
@@ -381,6 +360,35 @@ function MyRegistrations() {
           >
             Explore Events Feed
           </Link>
+        </div>
+      )}
+
+      {/* Glassmorphic Centered Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-md w-full p-6">
+            <h3 className="text-lg font-bold text-slate-800">Cancel Registration Booking</h3>
+            <p className="mt-3 text-slate-500 text-sm leading-relaxed">
+              Are you sure you want to cancel your booking for <strong className="text-slate-800">"{cancelTargetTitle}"</strong>? This will release your seat reservation.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-bold rounded-xl transition"
+              >
+                No, Keep Booking
+              </button>
+              <button
+                onClick={async () => {
+                  setShowConfirmModal(false);
+                  await executeCancel(cancelTargetId);
+                }}
+                className="px-4 py-2 bg-red-600 hover:bg-red-750 text-white text-xs font-bold rounded-xl shadow-md transition"
+              >
+                Yes, Cancel Booking
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
