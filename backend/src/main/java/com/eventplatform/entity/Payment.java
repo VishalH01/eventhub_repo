@@ -1,5 +1,6 @@
 package com.eventplatform.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
@@ -58,6 +59,7 @@ public class Payment {
     //   - nullable = false: Every payment record must be linked to a registration.
     @OneToOne
     @JoinColumn(name = "registration_id", unique = true, nullable = false)
+    @JsonIgnore
     private Registration registration;
 
     // Default Constructor: Required by JPA/Hibernate.
