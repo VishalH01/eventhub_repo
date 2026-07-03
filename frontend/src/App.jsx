@@ -10,6 +10,7 @@ import Layout from './components/Layout';
 // Import our page components
 import Home from './pages/Home';
 import Events from './pages/Events';
+import EventDetails from './pages/EventDetails';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import MyRegistrations from './pages/MyRegistrations';
@@ -28,6 +29,9 @@ function App() {
           
           {/* '/events' is the path to browse and search all events */}
           <Route path="/events" element={<Events />} />
+          
+          {/* '/events/:id' displays detailed listing for a single event */}
+          <Route path="/events/:id" element={<EventDetails />} />
           
           {/* '/login' and '/register' render auth pages */}
           <Route path="/login" element={<Login />} />

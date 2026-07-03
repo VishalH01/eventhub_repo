@@ -4,9 +4,9 @@ Welcome to the Event Management Platform! This project is a full-stack web appli
 
 ---
 
-## Current Status: Phase 4 Completed
+## Current Status: Phase 5 Completed
 
-We have successfully implemented **Phase 4: Spring Security and JWT Authentication** on the backend and integrated the registration/login forms in our React frontend.
+We have successfully implemented **Phase 5: Events CRUD & Search/Filters** on both the backend and frontend.
 
 ### Completed Features
 #### Phase 1: Backend Initialization
@@ -37,6 +37,13 @@ We have successfully implemented **Phase 4: Spring Security and JWT Authenticati
 - **Auth REST APIs**: Exposed register and login endpoints.
 - **Frontend Integration**: Hooked up React login/register pages to backend APIs, saving JWT tokens in `localStorage`, showing responsive alerts, and updating the navigation header dynamically.
 
+#### Phase 5: Events CRUD & Search/Filters
+- **Backend JPQL Search Query**: Written `EventRepository` to support text keywords searching (against title/description) and category filtering in a single optimized database call.
+- **Event REST APIs**: Created event services and controller exposing standard CRUD operations (public read, admin-only modify).
+- **Frontend Events Feed & Filtering**: Integrated the Browse Events feed, supporting live keywords input and categories dropdown filters with Axios request parameters.
+- **Frontend Event Details View**: Built a dedicated event page (`EventDetails.jsx`) loading detail logistics (Title, Description, Date/Time, Venue, Price) using React Router's path ID parameter.
+- **Admin CRUD Dashboard**: Implemented full event management in the Admin Dashboard, enabling admins to create, update, and delete events via reusable forms.
+
 ---
 
 ## Folder Structure
@@ -54,7 +61,8 @@ d:\Intern_Assign/
 │       │   │   ├── SecurityConfig.java     # Spring Security Filter Chain
 │       │   │   └── DataInitializer.java    # Seeds roles/users on startup
 │       │   ├── controller/
-│       │   │   └── AuthController.java     # Auth API endpoints (POST /login, POST /register)
+│       │   │   ├── AuthController.java     # Auth API endpoints (POST /login, POST /register)
+│       │   │   └── EventController.java    # Event CRUD API endpoints (GET, POST, PUT, DELETE)
 │       │   ├── dto/                        # Request/Response Data Transfer Objects
 │       │   │   ├── LoginRequest.java
 │       │   │   ├── RegisterRequest.java
@@ -62,15 +70,14 @@ d:\Intern_Assign/
 │       │   ├── entity/                     # JPA Database Entity classes
 │       │   ├── repository/                 # Database Query Repository interfaces
 │       │   │   ├── RoleRepository.java
-│       │   │   └── UserRepository.java
-│       │   │   └── EventRepository.java
+│       │   │   ├── UserRepository.java
+│       │   │   └── EventRepository.java    # Event custom JPQL query mapping
 │       │   ├── security/                   # JWT & UserDetails implementation
-│       │   │   ├── JwtTokenProvider.java   # Token utilities
-│       │   │   ├── JwtAuthenticationFilter.java # Once-per-request verification filter
-│       │   │   └── CustomUserDetailsService.java # Database credentials check
 │       │   └── service/                    # Business Logic layers
 │       │       ├── AuthService.java
-│       │       └── AuthServiceImpl.java
+│       │       ├── AuthServiceImpl.java
+│       │       ├── EventService.java
+│       │       └── EventServiceImpl.java
 │       └── main/resources/application.properties
 └── frontend/               # React JS frontend application
 ```
@@ -84,6 +91,15 @@ d:\Intern_Assign/
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **POST** | `/api/auth/register` | Registers a new user account | Public | `{"name", "email", "password"}` | String message |
 | **POST** | `/api/auth/login` | Logins user & returns JWT token | Public | `{"email", "password"}` | `{"accessToken", "tokenType", "email", "name", "roles"}` |
+
+### Event APIs (`/api/events`)
+| HTTP Method | Endpoint | Description | Access | Request Parameters | Request Body (JSON) | Response Body (JSON) |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **GET** | `/api/events` | Fetches all events matching search & category filters | Public | `search`, `category` (optional) | None | Event JSON Array |
+| **GET** | `/api/events/{id}` | Fetches details of a specific event | Public | None | None | Event JSON Object |
+| **POST** | `/api/events` | Creates a new event | Admin | None | Event Object (excluding ID) | Event JSON Object |
+| **PUT** | `/api/events/{id}` | Updates properties of an existing event | Admin | None | Event Object (excluding ID) | Event JSON Object |
+| **DELETE** | `/api/events/{id}` | Deletes an event | Admin | None | None | String message |
 
 ---
 
@@ -124,3 +140,4 @@ npm run dev
 * `feat: Phase 2 - Initialize React JS Frontend, Tailwind CSS, & Routing`
 * `feat: Phase 3 - Design Database Schema & Create JPA Entity Classes`
 * `feat: Phase 4 - Implement Spring Security & JWT Authentication`
+* `feat: Phase 5 - Implement Events CRUD REST APIs & Search Filters`

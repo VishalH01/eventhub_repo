@@ -1,50 +1,58 @@
-import React, { useState } from 'react';
-
-// Mock list of events to display initially for layout demonstration
-const MOCK_EVENTS = [
-  {
-    id: 1,
-    title: 'National Tech Summit 2026',
-    description: 'Explore the latest advancements in AI, full stack web engineering, and cloud platforms.',
-    date: 'August 15, 2026',
-    location: 'Mumbai, India',
-    price: 499.00,
-    category: 'Technology',
-    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 2,
-    title: 'Creative Design Workshop',
-    description: 'Learn UI/UX best practices, typography rules, and modern design principles from leading designers.',
-    date: 'September 02, 2026',
-    location: 'Pune, India',
-    price: 299.00,
-    category: 'Design',
-    image: 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=600&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 3,
-    title: 'Global Music Festival',
-    description: 'An evening of live concerts featuring top local bands and electronic music producers.',
-    date: 'October 10, 2026',
-    location: 'Goa, India',
-    price: 999.00,
-    category: 'Music',
-    image: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=600&auto=format&fit=crop&q=60'
-  }
-];
+import React, { useState, useEffect } from 'react';
+// Link allows navigation to the Event Details page on card click.
+import { Link } from 'react-router-dom';
+// Import our Axios API client
+import API from '../services/api';
 
 function Events() {
+  // State to hold the list of events fetched from our database.
+  const [events, setEvents] = useState([]);
+  // State to hold the current user-entered search string.
   const [searchTerm, setSearchTerm] = useState('');
+  // State to hold the currently selected dropdown category filter.
   const [selectedCategory, setSelectedCategory] = useState('All');
+  // State to show a loading indicator during API calls.
+  const [loading, setLoading] = useState(false);
+  // State to capture and display errors from the backend.
+  const [error, setError] = useState('');
 
-  // Filter logic for search and category select
-  const filteredEvents = MOCK_EVENTS.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          event.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || event.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // useEffect Hook: Runs code automatically after the component mounts,
+  // and re-runs whenever any value in the dependency array ([searchTerm, selectedCategory]) changes.
+  useEffect(() => {
+    // Declare a function to fetch filtered events from our Spring Boot API
+    const fetchEvents = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        // Send a GET request to `/api/events` with search and category parameters.
+        // Axios automatically builds the query string: e.g. /api/events?search=summit&category=Technology
+        const response = await API.get('/events', {
+          params: {
+            search: searchTerm,
+            category: selectedCategory
+          }
+        });
+        
+        // Update the events state with the list returned by the controller
+        setEvents(response.data);
+      } catch (err) {
+        setError('Failed to fetch events from server. Make sure the backend is running.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Debounce search input to avoid hitting the database on every single keypress
+    // (waits 300ms after the user stops typing before making the API request).
+    const delayDebounceFn = setTimeout(() => {
+      fetchEvents();
+    }, 300);
+
+    // Cleanup function: automatically runs to clear the timer when the user types again, resetting the delay.
+    return () => clearTimeout(delayDebounceFn);
+
+  }, [searchTerm, selectedCategory]);
 
   return (
     <div className="py-8 max-w-6xl mx-auto px-4">
@@ -79,17 +87,33 @@ function Events() {
         </div>
       </div>
 
-      {/* Events Grid */}
-      {filteredEvents.length > 0 ? (
+      {/* Error Alert */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-lg text-sm font-medium">
+          ⚠️ {error}
+        </div>
+      )}
+
+      {/* Loading Spinner */}
+      {loading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        </div>
+      ) : events.length > 0 ? (
+        /* Events Grid */
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {filteredEvents.map(event => (
+          {events.map(event => (
             <div key={event.id} className="bg-white rounded-xl shadow-sm border border-slate-150 overflow-hidden flex flex-col hover:shadow-md transition duration-150">
               {/* Event Image */}
-              <img
-                src={event.image}
-                alt={event.title}
-                className="w-full h-48 object-cover"
-              />
+              {event.imageUrl ? (
+                <img
+                  src={event.imageUrl}
+                  alt={event.title}
+                  className="w-full h-48 object-cover"
+                />
+              ) : (
+                <div className="w-full h-48 bg-slate-100 flex items-center justify-center text-4xl">📅</div>
+              )}
               
               {/* Event Details */}
               <div className="p-6 flex-1 flex flex-col justify-between">
@@ -107,7 +131,8 @@ function Events() {
 
                 <div className="mt-6 border-t border-slate-100 pt-4">
                   <div className="flex justify-between items-center text-sm text-slate-500">
-                    <span>📅 {event.date}</span>
+                    {/* Format standard ISO datetime into a friendly display */}
+                    <span>📅 {new Date(event.date).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'})}</span>
                     <span>📍 {event.location}</span>
                   </div>
                   
@@ -115,12 +140,13 @@ function Events() {
                     <span className="text-xl font-extrabold text-slate-800">
                       ₹{event.price.toFixed(2)}
                     </span>
-                    <button
-                      onClick={() => alert(`Registration clicked for: ${event.title}`)}
+                    {/* Link to Event Details Page */}
+                    <Link
+                      to={`/events/${event.id}`}
                       className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition"
                     >
-                      Register Now
-                    </button>
+                      View Details
+                    </Link>
                   </div>
                 </div>
               </div>
