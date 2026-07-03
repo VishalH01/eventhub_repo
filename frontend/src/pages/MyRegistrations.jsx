@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../services/api';
+import EventTicket from '../components/EventTicket';
 
 function MyRegistrations() {
   const [registrations, setRegistrations] = useState([]);
@@ -256,91 +257,58 @@ function MyRegistrations() {
 
       {/* Registrations List */}
       {registrations.length > 0 ? (
-        <div className="space-y-6">
-          {registrations.map((reg) => (
-            <div key={reg.id} className="bg-white rounded-xl shadow-sm border border-slate-150 p-6 flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
-              
-              {/* Event Info */}
-              <div className="flex-1">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-mono font-medium text-slate-400">ID: {reg.registrationNumber}</span>
-                  <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                    reg.status === 'CONFIRMED' 
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' 
-                      : reg.status === 'PENDING'
-                      ? 'bg-amber-50 text-amber-700 border border-amber-100'
-                      : 'bg-red-50 text-red-700 border border-red-100'
-                  }`}>
-                    {reg.status}
-                  </span>
-                </div>
-                
-                {/* Event Name Link to Details */}
-                <h3 className="mt-2 text-xl font-bold text-slate-800 hover:text-indigo-600 transition">
-                  <Link to={`/events/${reg.event.id}`}>{reg.event.title}</Link>
-                </h3>
-                
-                <p className="mt-1 text-sm text-slate-500">
-                  📅 Event Date: {new Date(reg.event.date).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'})}
-                </p>
-                <p className="mt-1 text-xs text-slate-400">
-                  Booked on: {new Date(reg.registrationDate).toLocaleString()}
-                </p>
+        <div className="space-y-8">
+          {registrations.map((reg) => {
+            const eventDate = new Date(reg.event.date);
+            const formattedDate = eventDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+            const formattedTime = eventDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+            
+            // Generate deterministic mock seatings for design requirements
+            const gateVal = "G" + ((reg.id % 3) + 1);
+            const rowVal = String.fromCharCode(65 + (reg.id % 6));
+            const seatVal = ((reg.id * 13) % 45) + 1;
+            const ticketTypeVal = reg.event.price > 499 ? "VIP" : "GENERAL";
 
-                <div className="mt-4 flex flex-wrap gap-4 items-center">
-                  <span className="text-sm text-slate-700 font-medium">
-                    Ticket Amount: <span className="text-slate-900 font-bold">₹{reg.event.price.toFixed(2)}</span>
-                  </span>
-                  
-                  {/* Actions for Pending Booking */}
-                  {reg.status === 'PENDING' && (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handlePaymentClick(reg.id, reg.event)}
-                        className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition"
-                      >
-                        Pay Now (Razorpay)
-                      </button>
-                      <button
-                        onClick={() => handleCancelClick(reg.id, reg.event.title)}
-                        className="px-3.5 py-2 border border-red-200 hover:bg-red-50 text-red-600 text-xs font-bold rounded-lg transition"
-                      >
-                        Cancel Booking
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* QR Code Section */}
-              <div className="w-full md:w-auto flex flex-col items-center justify-center p-4 bg-slate-50 rounded-xl border border-slate-100 min-w-[180px]">
-                {reg.status === 'CONFIRMED' ? (
-                  <>
-                    {/* Render dynamic backend-generated Base64 QR code image */}
-                    <img 
-                      src={`data:image/png;base64,${reg.qrCodeBase64}`} 
-                      alt="Ticket QR Code" 
-                      className="w-28 h-28 bg-white p-1 rounded-lg border border-slate-200"
-                    />
+            return (
+              <div key={reg.id} className="space-y-3">
+                <EventTicket
+                  eventName={reg.event.title}
+                  eventType={reg.event.category}
+                  venue={reg.event.location}
+                  date={formattedDate}
+                  time={formattedTime}
+                  gate={gateVal}
+                  row={rowVal}
+                  seat={seatVal}
+                  ticketType={ticketTypeVal}
+                  bookingId={reg.registrationNumber}
+                  registrationId={reg.registrationNumber}
+                  price={reg.event.price.toString()}
+                  paymentStatus={reg.status}
+                  qrImage={reg.qrCodeBase64}
+                  onPrint={reg.status === 'CONFIRMED' ? () => handleDownloadTicket(reg) : null}
+                />
+                
+                {/* Actions for Pending Booking */}
+                {reg.status === 'PENDING' && (
+                  <div className="flex gap-2.5 justify-end max-w-4xl mx-auto px-1">
                     <button
-                      onClick={() => handleDownloadTicket(reg)}
-                      className="mt-3.5 px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg transition"
+                      onClick={() => handlePaymentClick(reg.id, reg.event)}
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition"
                     >
-                      Print Ticket PDF
+                      Pay Now (Razorpay)
                     </button>
-                  </>
-                ) : (
-                  <div className="text-center p-3">
-                    <span className="text-2xl">⏳</span>
-                    <p className="mt-2 text-xs font-medium text-slate-500 max-w-[160px] mx-auto">
-                      Awaiting payment confirmation to generate entry QR code.
-                    </p>
+                    <button
+                      onClick={() => handleCancelClick(reg.id, reg.event.title)}
+                      className="px-4 py-2 border border-red-200 hover:bg-red-50 text-red-600 text-xs font-bold rounded-lg transition"
+                    >
+                      Cancel Booking
+                    </button>
                   </div>
                 )}
               </div>
-
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="text-center py-16 bg-white rounded-xl border border-slate-100 shadow-sm">
