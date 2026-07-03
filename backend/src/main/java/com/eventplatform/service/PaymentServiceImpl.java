@@ -40,10 +40,14 @@ public class PaymentServiceImpl implements PaymentService {
         Registration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new RuntimeException("Registration booking not found with ID: " + registrationId));
 
-        // Event price in Rupees
-        double price = registration.getEvent().getPrice();
+        // Calculate price based on the count of selected seats
+        int seatCount = 1;
+        if (registration.getSeats() != null && !registration.getSeats().trim().isEmpty()) {
+            seatCount = registration.getSeats().split(",").length;
+        }
+        double totalPrice = registration.getEvent().getPrice() * seatCount;
         // Convert to Paise (Razorpay processes amounts in the smallest currency unit: e.g. 1 Rupee = 100 Paise)
-        int amountInPaise = (int) (price * 100);
+        int amountInPaise = (int) (totalPrice * 100);
 
         try {
             // Robust Simulation Check:
@@ -122,7 +126,12 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setRazorpayOrderId(verifyRequest.getRazorpayOrderId());
         payment.setRazorpayPaymentId(verifyRequest.getRazorpayPaymentId());
         payment.setRazorpaySignature(verifyRequest.getRazorpaySignature());
-        payment.setAmount(registration.getEvent().getPrice());
+        int seatCount = 1;
+        if (registration.getSeats() != null && !registration.getSeats().trim().isEmpty()) {
+            seatCount = registration.getSeats().split(",").length;
+        }
+        double totalPaidAmount = registration.getEvent().getPrice() * seatCount;
+        payment.setAmount(totalPaidAmount);
         payment.setStatus("SUCCESS");
         payment.setPaymentDate(LocalDateTime.now());
         payment.setRegistration(registration);

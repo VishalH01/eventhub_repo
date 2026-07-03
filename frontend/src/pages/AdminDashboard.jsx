@@ -29,6 +29,12 @@ function AdminDashboard() {
   const [category, setCategory] = useState('Technology');
   const [imageUrl, setImageUrl] = useState('');
 
+  // Seating configuration states
+  const [seatingLayout, setSeatingLayout] = useState('STANDARD');
+  const [seatingRows, setSeatingRows] = useState('6');
+  const [seatingCols, setSeatingCols] = useState('10');
+  const [totalCapacity, setTotalCapacity] = useState('60');
+
   // Form editing state
   const [editMode, setEditMode] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -67,8 +73,6 @@ function AdminDashboard() {
   // Handle Create or Update submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccessMsg('');
 
     const eventPayload = {
       title,
@@ -77,7 +81,11 @@ function AdminDashboard() {
       location,
       price: parseFloat(price),
       category,
-      imageUrl
+      imageUrl,
+      seatingLayout,
+      seatingRows: parseInt(seatingRows),
+      seatingCols: parseInt(seatingCols),
+      totalCapacity: parseInt(totalCapacity)
     };
 
     try {
@@ -119,6 +127,10 @@ function AdminDashboard() {
     setPrice(event.price.toString());
     setCategory(event.category);
     setImageUrl(event.imageUrl || '');
+    setSeatingLayout(event.seatingLayout || 'STANDARD');
+    setSeatingRows((event.seatingRows || 6).toString());
+    setSeatingCols((event.seatingCols || 10).toString());
+    setTotalCapacity((event.totalCapacity || 60).toString());
   };
 
   // Handle Event Deletion
@@ -148,6 +160,10 @@ function AdminDashboard() {
     setPrice('');
     setCategory('Technology');
     setImageUrl('');
+    setSeatingLayout('STANDARD');
+    setSeatingRows('6');
+    setSeatingCols('10');
+    setTotalCapacity('60');
   };
 
   if (!isAdmin) {
@@ -349,6 +365,61 @@ function AdminDashboard() {
                 className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
                 placeholder="https://example.com/image.jpg"
               />
+            </div>
+
+            {/* Simulated Seating Layout Configuration Panel */}
+            <div className="grid grid-cols-2 gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="col-span-2">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Seating Layout Preset</label>
+                <select
+                  value={seatingLayout}
+                  onChange={(e) => setSeatingLayout(e.target.value)}
+                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-xs text-slate-700 font-medium"
+                >
+                  <option value="STANDARD">Standard Seating</option>
+                  <option value="VIP_FRONT">VIP Front Rows</option>
+                  <option value="CENTER_AISLE">Center Walkway Aisle</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Rows (Max 10)</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  required
+                  value={seatingRows}
+                  onChange={(e) => setSeatingRows(e.target.value)}
+                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-xs font-semibold text-slate-700"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Cols (Max 12)</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="12"
+                  required
+                  value={seatingCols}
+                  onChange={(e) => setSeatingCols(e.target.value)}
+                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-xs font-semibold text-slate-700"
+                />
+              </div>
+
+              <div className="col-span-2">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Seating Capacity (N)</label>
+                <input
+                  type="number"
+                  min="1"
+                  required
+                  value={totalCapacity}
+                  onChange={(e) => setTotalCapacity(e.target.value)}
+                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-xs font-semibold text-slate-700"
+                  placeholder="e.g. 50"
+                />
+              </div>
             </div>
 
             <div>

@@ -59,6 +59,9 @@ public class Registration {
     @OneToOne(mappedBy = "registration")
     private Payment payment;
 
+    @Column(name = "seats")
+    private String seats;
+
     // Default Constructor: Required by JPA/Hibernate.
     public Registration() {
     }
@@ -142,5 +145,13 @@ public class Registration {
 
     public void setQrCodeBase64(String qrCodeBase64) {
         this.qrCodeBase64 = qrCodeBase64;
+    }
+
+    public String getSeats() {
+        return seats;
+    }
+
+    public void setSeats(String seats) {
+        this.seats = seats;
     }
 }

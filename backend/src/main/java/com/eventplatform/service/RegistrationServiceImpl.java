@@ -31,7 +31,12 @@ public class RegistrationServiceImpl implements RegistrationService {
     private PaymentRepository paymentRepository;
 
     @Override
-    public Registration bookEvent(Long eventId, String email) {
+    @Transactional
+    public Registration bookEvent(Long eventId, String email, List<String> seats) {
+        if (seats == null || seats.isEmpty()) {
+            throw new RuntimeException("Please select at least one seat to book!");
+        }
+
         // Step A: Check if the user has already booked a ticket for this event.
         // Prevent duplicate bookings to ensure fair access to tickets.
         if (registrationRepository.existsByUserEmailAndEventId(email, eventId)) {
@@ -45,6 +50,14 @@ public class RegistrationServiceImpl implements RegistrationService {
         // Step C: Look up the event entity by ID.
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found with ID: " + eventId));
+
+        // Validate that requested seats are not already booked/reserved
+        List<String> reservedSeats = getReservedSeats(eventId);
+        for (String seat : seats) {
+            if (reservedSeats.contains(seat)) {
+                throw new RuntimeException("Seat " + seat + " is already reserved. Please select another seat.");
+            }
+        }
 
         // Step D: Instantiate and populate a new Registration record.
         Registration registration = new Registration();
@@ -62,6 +75,9 @@ public class RegistrationServiceImpl implements RegistrationService {
         // Associate the foreign key relationships
         registration.setUser(user);
         registration.setEvent(event);
+        
+        // Save selected seats
+        registration.setSeats(String.join(",", seats));
 
         // Step E: Persist to database. JPA handles inserting the foreign keys.
         return registrationRepository.save(registration);
@@ -116,5 +132,25 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         // Step D: Delete registration from the database.
         registrationRepository.delete(registration);
+    }
+
+    @Override
+    public List<String> getReservedSeats(Long eventId) {
+        // Find all active or pending bookings for this event
+        List<Registration> registrations = registrationRepository.findByEventIdAndStatusIn(
+            eventId, 
+            List.of("PENDING", "CONFIRMED")
+        );
+        
+        List<String> reserved = new java.util.ArrayList<>();
+        for (Registration reg : registrations) {
+            if (reg.getSeats() != null && !reg.getSeats().trim().isEmpty()) {
+                String[] seatsArray = reg.getSeats().split(",");
+                for (String seat : seatsArray) {
+                    reserved.add(seat.trim());
+                }
+            }
+        }
+        return reserved;
     }
 }

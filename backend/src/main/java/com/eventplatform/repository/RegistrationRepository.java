@@ -18,4 +18,6 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     // - Compiles into a fast EXISTS query in MySQL.
     // - Used to prevent duplicate bookings for the same event by the same user.
     boolean existsByUserEmailAndEventId(String email, Long eventId);
+
+    List<Registration> findByEventIdAndStatusIn(Long eventId, List<String> statuses);
 }

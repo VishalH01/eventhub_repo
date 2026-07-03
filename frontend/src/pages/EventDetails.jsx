@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import API from '../services/api';
+import SeatSelectionModal from '../components/SeatSelectionModal';
 
 function EventDetails() {
   const { id } = useParams(); // Extract event ID from URL
@@ -13,8 +14,22 @@ function EventDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Seating and modal states
+  const [isSeatModalOpen, setIsSeatModalOpen] = useState(false);
+  const [selectedSeats, setSelectedSeats] = useState([]);
+  const [reservedSeats, setReservedSeats] = useState([]);
+
   // Check if user is logged in
   const isLoggedIn = localStorage.getItem('token') !== null;
+
+  const fetchReservedSeats = async () => {
+    try {
+      const response = await API.get(`/registrations/event/${id}/reserved`);
+      setReservedSeats(response.data);
+    } catch (err) {
+      console.error("Failed to load reserved seats:", err);
+    }
+  };
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -30,26 +45,32 @@ function EventDetails() {
     };
 
     fetchEventDetails();
+    fetchReservedSeats();
   }, [id]);
 
-  const handleRegisterClick = async () => {
+  const handleRegisterClick = () => {
     if (!isLoggedIn) {
       toast.error('Please log in to register for events!');
       navigate('/login');
       return;
     }
+    // Open the seat selection modal instead of direct booking
+    setIsSeatModalOpen(true);
+  };
 
+  const handleBookSeats = async () => {
     try {
-      // POST registration details for this event
-      await API.post(`/registrations/book/${event.id}`);
+      await API.post(`/registrations/book/${event.id}`, {
+        seats: selectedSeats
+      });
       toast.success('Ticket booked successfully! Redirecting to your dashboard...');
+      setIsSeatModalOpen(false);
       
-      // Delay navigation slightly so user sees the success checkmark
       setTimeout(() => {
         navigate('/my-registrations');
       }, 1500);
     } catch (err) {
-      const errMsg = err.response?.data || 'Failed to book this ticket.';
+      const errMsg = err.response?.data || 'Failed to book ticket.';
       toast.error(typeof errMsg === 'string' ? errMsg : 'Booking failed.');
     }
   };
@@ -143,12 +164,26 @@ function EventDetails() {
               onClick={handleRegisterClick}
               className="w-full md:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-md transition duration-150 ease-in-out text-center"
             >
-              Register & Book Ticket
+              Select Seats & Register
             </button>
           </div>
 
         </div>
       </div>
+
+      {/* Interactive Seat Selection Modal Window */}
+      <SeatSelectionModal
+        isOpen={isSeatModalOpen}
+        onClose={() => {
+          setIsSeatModalOpen(false);
+          setSelectedSeats([]);
+        }}
+        event={event}
+        reservedSeats={reservedSeats}
+        selectedSeats={selectedSeats}
+        setSelectedSeats={setSelectedSeats}
+        onConfirm={handleBookSeats}
+      />
     </div>
   );
 }

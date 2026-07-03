@@ -76,9 +76,13 @@ function MyRegistrations() {
           return;
         }
 
+        const regObj = registrations.find(r => r.id === registrationId);
+        const seatCount = (regObj && regObj.seats) ? regObj.seats.split(',').length : 1;
+        const totalPaiseAmount = event.price * seatCount * 100;
+
         const options = {
           key: 'rzp_test_T95EFtiOkqEW3D', // Razorpay Test Key ID
-          amount: event.price * 100,      // Amount in Paise
+          amount: totalPaiseAmount,       // Amount in Paise
           currency: 'INR',
           name: 'EventHub Tickets',
           description: `Ticket Purchase for "${event.title}"`,
@@ -129,10 +133,13 @@ function MyRegistrations() {
 
   // Open a new printable viewport representing the ticket voucher card and trigger print
   const handleDownloadTicket = (reg) => {
+    const hasSeats = reg.seats && reg.seats.trim().length > 0;
+    const seatCount = hasSeats ? reg.seats.split(',').length : 1;
     const gateVal = "G" + ((reg.id % 3) + 1);
-    const rowVal = String.fromCharCode(65 + (reg.id % 6));
-    const seatVal = ((reg.id * 13) % 45) + 1;
+    const rowVal = hasSeats ? "-" : String.fromCharCode(65 + (reg.id % 6));
+    const seatVal = hasSeats ? reg.seats : ((reg.id * 13) % 45) + 1;
     const ticketTypeVal = reg.event.price > 499 ? "VIP" : "GENERAL";
+    const totalPaidPrice = reg.event.price * seatCount;
 
     const printWindow = window.open('', '_blank', 'width=1000,height=600');
     printWindow.document.write(`
@@ -209,7 +216,7 @@ function MyRegistrations() {
                   </div>
                   <div>
                     <span class="block text-[8px] font-bold text-slate-400 uppercase tracking-widest">Price</span>
-                    <span class="text-xs font-black text-emerald-400">₹${reg.event.price.toFixed(2)}</span>
+                    <span class="text-xs font-black text-emerald-400">₹${totalPaidPrice.toFixed(2)}</span>
                   </div>
                 </div>
                 <span class="text-[10px] font-semibold text-slate-400">Thank you for registering!</span>
@@ -304,11 +311,14 @@ function MyRegistrations() {
             const formattedDate = eventDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
             const formattedTime = eventDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
             
-            // Generate deterministic mock seatings for design requirements
+            // Check if ticket has seat selection or falls back to mock coordinates
+            const hasSeats = reg.seats && reg.seats.trim().length > 0;
+            const seatCount = hasSeats ? reg.seats.split(',').length : 1;
             const gateVal = "G" + ((reg.id % 3) + 1);
-            const rowVal = String.fromCharCode(65 + (reg.id % 6));
-            const seatVal = ((reg.id * 13) % 45) + 1;
+            const rowVal = hasSeats ? "-" : String.fromCharCode(65 + (reg.id % 6));
+            const seatVal = hasSeats ? reg.seats : (((reg.id * 13) % 45) + 1).toString();
             const ticketTypeVal = reg.event.price > 499 ? "VIP" : "GENERAL";
+            const totalPrice = (reg.event.price * seatCount).toString();
 
             return (
               <div key={reg.id} className="space-y-3">
@@ -324,7 +334,7 @@ function MyRegistrations() {
                   ticketType={ticketTypeVal}
                   bookingId={reg.registrationNumber}
                   registrationId={reg.registrationNumber}
-                  price={reg.event.price.toString()}
+                  price={totalPrice}
                   paymentStatus={reg.status}
                   qrImage={reg.qrCodeBase64}
                   onPrint={reg.status === 'CONFIRMED' ? () => handleDownloadTicket(reg) : null}

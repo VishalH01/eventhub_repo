@@ -49,6 +49,18 @@ public class Event {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(name = "seating_layout")
+    private String seatingLayout = "STANDARD";
+
+    @Column(name = "seating_rows")
+    private Integer seatingRows = 6;
+
+    @Column(name = "seating_cols")
+    private Integer seatingCols = 10;
+
+    @Column(name = "total_capacity")
+    private Integer totalCapacity = 60;
+
     // Default Constructor: Required by JPA/Hibernate.
     public Event() {
     }
@@ -128,5 +140,37 @@ public class Event {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getSeatingLayout() {
+        return seatingLayout;
+    }
+
+    public void setSeatingLayout(String seatingLayout) {
+        this.seatingLayout = seatingLayout;
+    }
+
+    public Integer getSeatingRows() {
+        return seatingRows;
+    }
+
+    public void setSeatingRows(Integer seatingRows) {
+        this.seatingRows = seatingRows;
+    }
+
+    public Integer getSeatingCols() {
+        return seatingCols;
+    }
+
+    public void setSeatingCols(Integer seatingCols) {
+        this.seatingCols = seatingCols;
+    }
+
+    public Integer getTotalCapacity() {
+        return totalCapacity;
+    }
+
+    public void setTotalCapacity(Integer totalCapacity) {
+        this.totalCapacity = totalCapacity;
     }
 }

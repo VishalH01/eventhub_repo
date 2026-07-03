@@ -113,7 +113,9 @@ function EventTicket({
                 <Ticket className="w-3.5 h-3.5 group-hover:text-indigo-500 transition" />
                 <span className="text-[10px] font-bold uppercase tracking-wider">Seat</span>
               </div>
-              <p className="mt-1 text-sm md:text-base font-black text-slate-800">{seat}</p>
+              <p className={`mt-1 text-slate-800 ${seat.length > 8 ? 'text-[10px] font-black leading-tight' : 'text-sm md:text-base font-black'}`}>
+                {seat}
+              </p>
             </div>
 
             {/* Grid 4: Ticket Type */}

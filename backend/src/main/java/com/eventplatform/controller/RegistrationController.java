@@ -18,18 +18,31 @@ public class RegistrationController {
     @Autowired
     private RegistrationService registrationService;
 
-    // 1. Book Event Ticket
+    public static class SeatBookingRequest {
+        private List<String> seats;
+
+        public List<String> getSeats() {
+            return seats;
+        }
+
+        public void setSeats(List<String> seats) {
+            this.seats = seats;
+        }
+    }
+
+    // 1. Book Event Ticket with Seat Selection
     // - Route: POST http://localhost:8080/api/registrations/book/{eventId}
-    // - Principal: Spring Security automatically injects the currently logged-in user Principal.
-    //   principal.getName() retrieves the subject (email address) stored inside the request's validated JWT token.
     @PostMapping("/book/{eventId}")
-    public ResponseEntity<?> bookEvent(@PathVariable("eventId") Long eventId, Principal principal) {
+    public ResponseEntity<?> bookEvent(
+            @PathVariable("eventId") Long eventId, 
+            @RequestBody SeatBookingRequest request,
+            Principal principal) {
         try {
             String email = principal.getName(); // Extract logged-in user's email
-            Registration registration = registrationService.bookEvent(eventId, email);
+            Registration registration = registrationService.bookEvent(eventId, email, request.getSeats());
             return new ResponseEntity<>(registration, HttpStatus.CREATED);
         } catch (RuntimeException e) {
-            // Return bad request error (e.g. duplicate bookings)
+            // Return bad request error (e.g. duplicate bookings or seat already taken)
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -55,5 +68,13 @@ public class RegistrationController {
             // Returns 400 Bad Request if ownership validation checks fail or ID doesn't exist
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    // 4. Fetch Reserved Seats for an Event
+    // - Route: GET http://localhost:8080/api/registrations/event/{eventId}/reserved
+    @GetMapping("/event/{eventId}/reserved")
+    public ResponseEntity<List<String>> getReservedSeats(@PathVariable("eventId") Long eventId) {
+        List<String> reserved = registrationService.getReservedSeats(eventId);
+        return ResponseEntity.ok(reserved);
     }
 }

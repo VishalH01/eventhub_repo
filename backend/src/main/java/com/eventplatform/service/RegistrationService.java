@@ -5,12 +5,15 @@ import java.util.List;
 
 public interface RegistrationService {
 
-    // Books a ticket for a specific event by user email.
-    Registration bookEvent(Long eventId, String email);
+    // Books a ticket for a specific event by user email with custom seats.
+    Registration bookEvent(Long eventId, String email, List<String> seats);
 
     // Retrieves all bookings registered by the user.
     List<Registration> getMyRegistrations(String email);
 
     // Cancels a specific event registration after verifying ownership.
     void cancelRegistration(Long id, String email);
+
+    // Retrieves all reserved seats for a specific event.
+    List<String> getReservedSeats(Long eventId);
 }
