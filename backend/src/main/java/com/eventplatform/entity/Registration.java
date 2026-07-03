@@ -56,7 +56,7 @@ public class Registration {
     // - Each event registration has exactly one corresponding payment record.
     // - 'mappedBy = "registration"' tells Hibernate that the foreign key mapping is defined in the Payment class,
     //   not in this class (Registration is the inverse side of the relationship).
-    @OneToOne(mappedBy = "registration")
+    @OneToOne(mappedBy = "registration", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
     private Payment payment;
 
     // Default Constructor: Required by JPA/Hibernate.

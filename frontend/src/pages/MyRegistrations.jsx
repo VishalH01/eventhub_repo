@@ -123,77 +123,125 @@ function MyRegistrations() {
 
   // Open a new printable viewport representing the ticket voucher card and trigger print
   const handleDownloadTicket = (reg) => {
-    const printWindow = window.open('', '_blank', 'width=800,height=650');
+    const gateVal = "G" + ((reg.id % 3) + 1);
+    const rowVal = String.fromCharCode(65 + (reg.id % 6));
+    const seatVal = ((reg.id * 13) % 45) + 1;
+    const ticketTypeVal = reg.event.price > 499 ? "VIP" : "GENERAL";
+
+    const printWindow = window.open('', '_blank', 'width=1000,height=600');
     printWindow.document.write(`
       <html>
         <head>
-          <title>Ticket Voucher - ${reg.registrationNumber}</title>
+          <title>Ticket Pass - ${reg.registrationNumber}</title>
+          <script src="https://cdn.tailwindcss.com"></script>
           <style>
-            body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 40px; color: #334155; background-color: #f8fafc; }
-            .ticket-card { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 30px; max-width: 500px; margin: 0 auto; background: #fff; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
-            .header { text-align: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; }
-            .logo { font-size: 24px; font-weight: bold; color: #4F46E5; margin-bottom: 5px; }
-            .title { font-size: 22px; font-weight: 800; color: #1e293b; margin: 15px 0 5px 0; text-align: center; }
-            .meta-row { display: flex; justify-content: space-between; margin: 15px 0; font-size: 14px; }
-            .meta-col { flex: 1; }
-            .meta-label { font-weight: 600; color: #94a3b8; text-transform: uppercase; font-size: 9px; letter-spacing: 0.05em; }
-            .meta-val { font-weight: 700; color: #334155; margin-top: 2px; }
-            .qr-sec { text-align: center; margin-top: 25px; padding-top: 20px; border-top: 2px solid #f1f5f9; }
-            .qr-img { width: 140px; height: 140px; border: 1px solid #e2e8f0; padding: 5px; border-radius: 8px; }
-            .footer-msg { text-align: center; font-size: 10px; color: #94a3b8; margin-top: 15px; font-weight: 500; }
             @media print {
-              body { padding: 0; background: none; }
-              .ticket-card { box-shadow: none; border: 2px solid #000; }
+              body { background: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 20px; }
             }
           </style>
         </head>
-        <body>
-          <div class="ticket-card">
-            <div class="header">
-              <div class="logo">🎟️ EventHub Boarding Pass</div>
-              <div style="font-size: 11px; color: #10b981; font-weight: bold; text-transform: uppercase;">Ticket Status: CONFIRMED</div>
-            </div>
+        <body class="bg-slate-50 p-8 flex items-center justify-center min-h-screen">
+          
+          <div class="w-full max-w-4xl bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden flex flex-row">
             
-            <div class="title">${reg.event.title}</div>
-            
-            <div class="meta-row">
-              <div class="meta-col">
-                <div class="meta-label">Ticket Number</div>
-                <div class="meta-val">${reg.registrationNumber}</div>
+            <!-- Left section (70%) -->
+            <div class="flex-[7] p-6 flex flex-col justify-between relative bg-gradient-to-br from-white to-slate-50/30">
+              <div>
+                <div class="flex items-center justify-between gap-4">
+                  <span class="px-3.5 py-1 text-[10px] font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 rounded-full uppercase tracking-widest shadow-sm">
+                    Live Event
+                  </span>
+                  <div class="text-xs text-slate-400 font-medium">
+                    <span>${new Date(reg.event.date).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'})}</span>
+                    <span class="mx-1">•</span>
+                    <span>${new Date(reg.event.date).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})}</span>
+                  </div>
+                </div>
+
+                <div class="mt-4">
+                  <h3 class="text-xl font-black text-slate-800 tracking-tight leading-snug">
+                    ${reg.event.title}
+                  </h3>
+                  <p class="mt-1 text-xs font-semibold text-slate-400 tracking-wide">
+                    ${reg.event.category}
+                  </p>
+                </div>
+
+                <div class="mt-3.5 flex items-center gap-2 text-xs text-slate-600 font-bold">
+                  <span>📍 ${reg.event.location}</span>
+                </div>
+
+                <div class="grid grid-cols-4 gap-3 mt-6">
+                  <div class="p-3 rounded-xl border border-slate-100 bg-white">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Gate</span>
+                    <p class="mt-0.5 text-sm font-black text-slate-800">${gateVal}</p>
+                  </div>
+                  <div class="p-3 rounded-xl border border-slate-100 bg-white">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Row</span>
+                    <p class="mt-0.5 text-sm font-black text-slate-800">${rowVal}</p>
+                  </div>
+                  <div class="p-3 rounded-xl border border-slate-100 bg-white">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Seat</span>
+                    <p class="mt-0.5 text-sm font-black text-slate-800">${seatVal}</p>
+                  </div>
+                  <div class="p-3 rounded-xl border border-slate-100 bg-white">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Type</span>
+                    <p class="mt-0.5 text-sm font-black text-indigo-600 uppercase">${ticketTypeVal}</p>
+                  </div>
+                </div>
               </div>
-              <div class="meta-col" style="text-align: right;">
-                <div class="meta-label">Attendee Name</div>
-                <div class="meta-val">${user ? user.name : 'Attendee'}</div>
-              </div>
-            </div>
-            
-            <div class="meta-row">
-              <div class="meta-col">
-                <div class="meta-label">Event Date & Time</div>
-                <div class="meta-val">${new Date(reg.event.date).toLocaleDateString(undefined, {weekday: 'long', month: 'short', day: 'numeric', year: 'numeric'})}</div>
-              </div>
-              <div class="meta-col" style="text-align: right;">
-                <div class="meta-label">Venue Location</div>
-                <div class="meta-val">📍 ${reg.event.location}</div>
+
+              <div class="mt-6 -mx-6 -mb-6 bg-slate-900 px-6 py-4 flex items-center justify-between">
+                <div class="flex gap-x-6">
+                  <div>
+                    <span class="block text-[8px] font-bold text-slate-400 uppercase tracking-widest">Booking ID</span>
+                    <span class="text-xs font-mono font-bold text-white">${reg.registrationNumber}</span>
+                  </div>
+                  <div>
+                    <span class="block text-[8px] font-bold text-slate-400 uppercase tracking-widest">Booking Date</span>
+                    <span class="text-xs font-bold text-white">${new Date(reg.registrationDate).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'})}</span>
+                  </div>
+                  <div>
+                    <span class="block text-[8px] font-bold text-slate-400 uppercase tracking-widest">Price</span>
+                    <span class="text-xs font-black text-emerald-400">₹${reg.event.price.toFixed(2)}</span>
+                  </div>
+                </div>
+                <span class="text-[10px] font-semibold text-slate-400">Thank you for registering!</span>
               </div>
             </div>
 
-            <div class="meta-row">
-              <div class="meta-col">
-                <div class="meta-label">Category</div>
-                <div class="meta-val">${reg.event.category}</div>
+            <!-- Dashed divider -->
+            <div class="relative flex flex-col justify-center items-center px-2 bg-white select-none">
+              <div class="h-full border-l-2 border-dashed border-slate-200"></div>
+              <div class="absolute top-1/2 -left-3.5 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-50 border border-slate-200/80"></div>
+              <div class="absolute bottom-1/2 -right-3.5 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-50 border border-slate-200/80"></div>
+            </div>
+
+            <!-- Right section (30%) -->
+            <div class="flex-[3] p-6 bg-slate-50/50 flex flex-col justify-between items-center text-center">
+              <div>
+                <span class="text-[10px] font-black text-slate-400 tracking-[0.25em] uppercase">Admit One</span>
               </div>
-              <div class="meta-col" style="text-align: right;">
-                <div class="meta-label">Price Paid</div>
-                <div class="meta-val">INR ${reg.event.price.toFixed(2)}</div>
+              
+              <div class="my-4 p-2 bg-white rounded-2xl border border-slate-150 shadow-md">
+                <img class="w-28 h-28 object-contain" src="data:image/png;base64,${reg.qrCodeBase64}" alt="Entry QR" />
+              </div>
+
+              <div class="w-full">
+                <div class="px-3 py-1.5 bg-slate-100 rounded-xl inline-block border border-slate-200/60">
+                  <span class="block text-[8px] font-bold text-slate-400 uppercase tracking-widest">Registration ID</span>
+                  <span class="text-[10px] font-mono font-extrabold text-slate-700">${reg.registrationNumber}</span>
+                </div>
+                <div class="mt-3">
+                  <span class="inline-block px-3.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-100">
+                    Paid
+                  </span>
+                </div>
               </div>
             </div>
-            
-            <div class="qr-sec">
-              <img class="qr-img" src="data:image/png;base64,${reg.qrCodeBase64}" alt="Entry Pass QR" />
-              <div class="footer-msg">Present this barcode at the entry gate for scanning verification.</div>
-            </div>
+
           </div>
+
           <script>
             window.onload = function() {
               window.print();
