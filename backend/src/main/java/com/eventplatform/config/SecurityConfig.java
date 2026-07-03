@@ -72,6 +72,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/events/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/events/**").hasRole("ADMIN")
                 
+                // Restrict administrative stats APIs strictly to ADMIN users
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                
                 // Any other API requests require the user to be logged in (authenticated)
                 .anyRequest().authenticated()
             )

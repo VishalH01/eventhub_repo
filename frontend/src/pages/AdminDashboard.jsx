@@ -13,6 +13,14 @@ function AdminDashboard() {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
+  // Analytics stats state
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalEvents: 0,
+    totalRegistrations: 0,
+    totalRevenue: 0.0
+  });
+
   // Form states for creating/editing events
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -29,7 +37,6 @@ function AdminDashboard() {
   // Fetch all events on page load
   const fetchEvents = async () => {
     try {
-      // Get all events without filters to manage them
       const response = await API.get('/events');
       setEvents(response.data);
     } catch (err) {
@@ -40,9 +47,21 @@ function AdminDashboard() {
     }
   };
 
+  // Fetch dashboard statistics
+  const fetchStats = async () => {
+    try {
+      const response = await API.get('/admin/stats');
+      setStats(response.data);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to fetch dashboard metrics.');
+    }
+  };
+
   useEffect(() => {
     if (isAdmin) {
       fetchEvents();
+      fetchStats();
     }
   }, [isAdmin]);
 
@@ -52,11 +71,9 @@ function AdminDashboard() {
     setError('');
     setSuccessMsg('');
 
-    // Prepare payload
     const eventPayload = {
       title,
       description,
-      // Convert HTML datetime-local string to standard ISO format
       date: new Date(date).toISOString(),
       location,
       price: parseFloat(price),
@@ -66,21 +83,20 @@ function AdminDashboard() {
 
     try {
       if (editMode) {
-        // Send PUT request to update event details
         await API.put(`/events/${editingId}`, eventPayload);
         setSuccessMsg('Event updated successfully!');
       } else {
-        // Send POST request to create a new event record
         await API.post('/events', eventPayload);
         setSuccessMsg('Event created successfully!');
       }
 
-      // Reset form states and refresh events list
+      // Reset form states and refresh events list & stats counters
       resetForm();
       fetchEvents();
+      fetchStats();
     } catch (err) {
       console.error(err);
-      setError(err.response?.data || 'Failed to save event. Ensure all required fields are filled.');
+      setError(err.response?.data || 'Failed to save event. Ensure all fields are valid.');
     }
   };
 
@@ -91,10 +107,8 @@ function AdminDashboard() {
     setTitle(event.title);
     setDescription(event.description || '');
     
-    // Format LocalDateTime string to match datetime-local input format (YYYY-MM-DDTHH:MM)
     if (event.date) {
       const d = new Date(event.date);
-      // Offset local date timezone for the HTML input field value compatibility
       const pad = (num) => String(num).padStart(2, '0');
       const formattedDate = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
       setDate(formattedDate);
@@ -119,6 +133,7 @@ function AdminDashboard() {
       await API.delete(`/events/${id}`);
       setSuccessMsg('Event deleted successfully!');
       fetchEvents();
+      fetchStats(); // Update stats counts
     } catch (err) {
       console.error(err);
       setError(err.response?.data || 'Failed to delete event.');
@@ -138,7 +153,6 @@ function AdminDashboard() {
     setImageUrl('');
   };
 
-  // Render Access Denied if the user is not an administrator
   if (!isAdmin) {
     return (
       <div className="py-16 text-center max-w-xl mx-auto px-4">
@@ -155,6 +169,47 @@ function AdminDashboard() {
       <div className="mb-8 text-center md:text-left">
         <h2 className="text-3xl font-extrabold text-slate-800">Admin Dashboard</h2>
         <p className="mt-2 text-slate-500">Create, edit, and delete events, and monitor platform statistics.</p>
+      </div>
+
+      {/* Analytics Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        
+        {/* Card 1: Revenue */}
+        <div className="bg-white p-6 rounded-xl border border-slate-150 shadow-sm flex items-center gap-4 hover:scale-[1.02] transition duration-150">
+          <div className="p-3 bg-emerald-50 rounded-lg text-2xl">💰</div>
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Revenue</p>
+            <h4 className="text-2xl font-black text-slate-800 mt-1">₹{stats.totalRevenue.toFixed(2)}</h4>
+          </div>
+        </div>
+
+        {/* Card 2: Bookings */}
+        <div className="bg-white p-6 rounded-xl border border-slate-150 shadow-sm flex items-center gap-4 hover:scale-[1.02] transition duration-150">
+          <div className="p-3 bg-blue-50 rounded-lg text-2xl">🎟️</div>
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Bookings</p>
+            <h4 className="text-2xl font-black text-slate-800 mt-1">{stats.totalRegistrations}</h4>
+          </div>
+        </div>
+
+        {/* Card 3: Users */}
+        <div className="bg-white p-6 rounded-xl border border-slate-150 shadow-sm flex items-center gap-4 hover:scale-[1.02] transition duration-150">
+          <div className="p-3 bg-amber-50 rounded-lg text-2xl">👥</div>
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Users</p>
+            <h4 className="text-2xl font-black text-slate-800 mt-1">{stats.totalUsers}</h4>
+          </div>
+        </div>
+
+        {/* Card 4: Events */}
+        <div className="bg-white p-6 rounded-xl border border-slate-150 shadow-sm flex items-center gap-4 hover:scale-[1.02] transition duration-150">
+          <div className="p-3 bg-violet-50 rounded-lg text-2xl">📅</div>
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Events</p>
+            <h4 className="text-2xl font-black text-slate-800 mt-1">{stats.totalEvents}</h4>
+          </div>
+        </div>
+
       </div>
 
       {/* Notifications */}

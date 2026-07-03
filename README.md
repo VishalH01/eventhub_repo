@@ -4,9 +4,9 @@ Welcome to the Event Management Platform! This project is a full-stack web appli
 
 ---
 
-## Current Status: Phase 8 Completed
+## Current Status: Phase 9 Completed
 
-We have successfully implemented **Phase 8: QR Code Generator & Ticket Generation** on both the backend and frontend.
+We have successfully implemented **Phase 9: Admin Dashboard & Analytics** on both the backend and frontend.
 
 ### Completed Features
 #### Phase 1: Backend Initialization
@@ -64,6 +64,12 @@ We have successfully implemented **Phase 8: QR Code Generator & Ticket Generatio
 - **Base64 Image Utility**: Built `QrCodeGenerator.java` to encode QR code bit matrices containing booking ticket codes, attendee names, and event schedules into Base64 PNG strings.
 - **Printable Boarding Pass**: Added print handlers in `MyRegistrations.jsx` that dynamically open a formatted ticket invoice window and execute the browser's native `window.print()` command.
 
+#### Phase 9: Admin Dashboard & Analytics
+- **Aggregation Repositories**: Coded custom JPQL aggregation queries in `PaymentRepository` using `COALESCE` sums.
+- **Security Path Lockdown**: Configured Spring Security matchers in `SecurityConfig.java` restricting `/api/admin/**` paths exclusively to users holding `ROLE_ADMIN` authority.
+- **Admin Stats REST API**: Created `/api/admin/stats` returning dashboard counts (registered users, listed events, active registrations) and total successful ticket revenue.
+- **Interactive Metric Panels**: Created a 4-card statistics grid at the top of the frontend `AdminDashboard.jsx` presenting responsive counts (Revenue, Bookings, Users, Events) complete with hover transitions and automatic data refetching upon event updates/deletions.
+
 ---
 
 ## Folder Structure
@@ -78,14 +84,36 @@ d:\Intern_Assign/
 │       ├── main/java/com/eventplatform/
 │       │   ├── EventPlatformApplication.java
 │       │   ├── config/
+│       │   │   └── SecurityConfig.java     # Route authorizations & JWT setups
 │       │   ├── controller/
+│       │   │   ├── AuthController.java
+│       │   │   ├── EventController.java
+│       │   │   ├── RegistrationController.java
+│       │   │   ├── PaymentController.java
+│       │   │   └── AdminController.java        # Dashboard stats endpoint
 │       │   ├── dto/
+│       │   │   ├── LoginRequest.java
+│       │   │   ├── RegisterRequest.java
+│       │   │   ├── AuthResponse.java
+│       │   │   ├── PaymentRequest.java
+│       │   │   └── AdminStatsResponse.java     # Metrics transfer DTO
 │       │   ├── entity/
 │       │   ├── repository/
+│       │   │   ├── RoleRepository.java
+│       │   │   ├── UserRepository.java
+│       │   │   ├── EventRepository.java
+│       │   │   ├── RegistrationRepository.java
+│       │   │   └── PaymentRepository.java      # Aggregation custom queries
 │       │   ├── security/
 │       │   ├── util/
-│       │   │   └── QrCodeGenerator.java    # ZXing QR Code PNG generator
+│       │   │   └── QrCodeGenerator.java
 │       │   └── service/
+│       │       ├── AuthService.java
+│       │       ├── EventService.java
+│       │       ├── RegistrationService.java
+│       │       ├── PaymentService.java
+│       │       ├── AdminStatsService.java
+│       │       └── AdminStatsServiceImpl.java  # Analytical calculation beans
 │       └── main/resources/application.properties
 └── frontend/               # React JS frontend application
 ```
@@ -121,6 +149,11 @@ d:\Intern_Assign/
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **POST** | `/api/payments/create-order/{registrationId}` | Generates a unique Razorpay Order ID | User | None | `{"orderId": "order_..."}` |
 | **POST** | `/api/payments/verify/{registrationId}` | Validates SHA256 payment signature & confirms booking | User | `{"razorpayOrderId", "razorpayPaymentId", "razorpaySignature"}` | Registration JSON Object |
+
+### Admin APIs (`/api/admin`)
+| HTTP Method | Endpoint | Description | Access | Request Body (JSON) | Response Body (JSON) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **GET** | `/api/admin/stats` | Fetches counts of users, events, registrations, and total revenue | Admin | None | `{"totalUsers", "totalEvents", "totalRegistrations", "totalRevenue"}` |
 
 ---
 
@@ -165,3 +198,4 @@ npm run dev
 * `feat: Phase 6 - Implement Event Registration (Book Ticket) APIs`
 * `feat: Phase 7 - Implement Razorpay Payment Gateway Integration`
 * `feat: Phase 8 - Implement dynamic QR Code Generator & Printable Ticket passes`
+* `feat: Phase 9 - Implement secure Admin Dashboard Analytics & Metrics cards`
