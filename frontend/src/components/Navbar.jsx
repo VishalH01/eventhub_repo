@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Ticket } from 'lucide-react';
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,7 +36,7 @@ function Navbar() {
           {/* Logo Brand Link */}
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center gap-2">
-              <span className="text-2xl">🎟️</span>
+              <Ticket className="w-6 h-6 text-indigo-600 shrink-0 transform -rotate-12 animate-pulse" />
               <span className="text-xl font-black bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent tracking-tight">
                 EventHub
               </span>
