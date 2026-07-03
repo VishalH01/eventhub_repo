@@ -134,10 +134,11 @@ function MyRegistrations() {
   // Open a new printable viewport representing the ticket voucher card and trigger print
   const handleDownloadTicket = (reg) => {
     const hasSeats = reg.seats && reg.seats.trim().length > 0;
-    const seatCount = hasSeats ? reg.seats.split(',').length : 1;
+    const seatList = hasSeats ? reg.seats.split(',') : [];
+    const seatCount = seatList.length;
     const gateVal = "G" + ((reg.id % 3) + 1);
-    const rowVal = hasSeats ? "-" : String.fromCharCode(65 + (reg.id % 6));
-    const seatVal = hasSeats ? reg.seats : ((reg.id * 13) % 45) + 1;
+    const rowVal = hasSeats ? [...new Set(seatList.map(s => s.split('-')[0].trim()))].join(', ') : String.fromCharCode(65 + (reg.id % 6));
+    const seatVal = hasSeats ? seatList.map(s => s.split('-')[1].trim()).join(', ') : ((reg.id * 13) % 45) + 1;
     const ticketTypeVal = reg.event.price > 499 ? "VIP" : "GENERAL";
     const totalPaidPrice = reg.event.price * seatCount;
 
@@ -313,10 +314,11 @@ function MyRegistrations() {
             
             // Check if ticket has seat selection or falls back to mock coordinates
             const hasSeats = reg.seats && reg.seats.trim().length > 0;
-            const seatCount = hasSeats ? reg.seats.split(',').length : 1;
+            const seatList = hasSeats ? reg.seats.split(',') : [];
+            const seatCount = seatList.length;
             const gateVal = "G" + ((reg.id % 3) + 1);
-            const rowVal = hasSeats ? "-" : String.fromCharCode(65 + (reg.id % 6));
-            const seatVal = hasSeats ? reg.seats : (((reg.id * 13) % 45) + 1).toString();
+            const rowVal = hasSeats ? [...new Set(seatList.map(s => s.split('-')[0].trim()))].join(', ') : String.fromCharCode(65 + (reg.id % 6));
+            const seatVal = hasSeats ? seatList.map(s => s.split('-')[1].trim()).join(', ') : (((reg.id * 13) % 45) + 1).toString();
             const ticketTypeVal = reg.event.price > 499 ? "VIP" : "GENERAL";
             const totalPrice = (reg.event.price * seatCount).toString();
 
