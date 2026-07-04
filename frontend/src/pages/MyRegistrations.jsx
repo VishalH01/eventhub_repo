@@ -132,7 +132,183 @@ function MyRegistrations() {
   };
 
   // Open a new printable viewport representing the ticket voucher card and trigger print
-  const handleDownloadTicket = (reg) => {
+  const handleDownloadTicket = async (reg) => {
+    const loadingToast = toast.loading("Generating your PDF ticket...");
+    
+    try {
+      // 1. Dynamically load html2canvas if not already loaded
+      if (!window.html2canvas) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+      // 2. Dynamically load jsPDF if not already loaded
+      if (!window.jspdf) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+
+      // 3. Render the ticket layout in a hidden DOM element
+      const ticketContainer = document.createElement('div');
+      ticketContainer.style.position = 'absolute';
+      ticketContainer.style.left = '-9999px';
+      ticketContainer.style.top = '-9999px';
+      ticketContainer.style.width = '850px';
+      
+      const hasSeats = reg.seats && reg.seats.trim().length > 0;
+      const seatList = hasSeats ? reg.seats.split(',') : [];
+      const seatCount = seatList.length;
+      const gateVal = "G" + ((reg.id % 3) + 1);
+      const rowVal = hasSeats ? [...new Set(seatList.map(s => s.split('-')[0].trim()))].join(', ') : String.fromCharCode(65 + (reg.id % 6));
+      const seatVal = hasSeats ? seatList.map(s => s.split('-')[1].trim()).join(', ') : ((reg.id * 13) % 45) + 1;
+      const ticketTypeVal = reg.event.price > 499 ? "VIP" : "GENERAL";
+      const totalPaidPrice = reg.event.price * seatCount;
+
+      ticketContainer.innerHTML = `
+        <div style="background-color: #f8fafc; padding: 24px; display: flex; align-items: center; justify-content: center;">
+          <div id="ticket-capture-target" style="width: 800px; background-color: #ffffff; border-radius: 24px; border: 1px solid #e2e8f0; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); overflow: hidden; display: flex; flex-direction: row; font-family: system-ui, -apple-system, sans-serif;">
+            
+            <!-- Left section (70%) -->
+            <div style="flex: 7; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+              <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                  <span style="padding: 4px 14px; font-size: 10px; font-weight: 800; color: #ffffff; background: linear-gradient(to right, #4f46e5, #7c3aed); border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.1em;">
+                    Live Event
+                  </span>
+                  <div style="font-size: 12px; color: #94a3b8; font-weight: 600;">
+                    <span>${new Date(reg.event.date).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'})}</span>
+                    <span style="margin: 0 4px;">•</span>
+                    <span>${new Date(reg.event.date).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})}</span>
+                  </div>
+                </div>
+
+                <div style="margin-top: 16px;">
+                  <h3 style="margin: 0; font-size: 20px; font-weight: 900; color: #1e293b; letter-spacing: -0.025em; line-height: 1.25;">
+                    ${reg.event.title}
+                  </h3>
+                  <p style="margin: 4px 0 0 0; font-size: 12px; font-weight: 600; color: #94a3b8; letter-spacing: 0.05em; text-transform: uppercase;">
+                    ${reg.event.category}
+                  </p>
+                </div>
+
+                <div style="margin-top: 14px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #475569; font-weight: 700;">
+                  <span>📍 ${reg.event.location}</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 24px;">
+                  <div style="padding: 12px; border-radius: 12px; border: 1px solid #f1f5f9; background-color: #ffffff; text-align: left;">
+                    <span style="font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Gate</span>
+                    <p style="margin: 2px 0 0 0; font-size: 14px; font-weight: 900; color: #1e293b;">${gateVal}</p>
+                  </div>
+                  <div style="padding: 12px; border-radius: 12px; border: 1px solid #f1f5f9; background-color: #ffffff; text-align: left;">
+                    <span style="font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Row</span>
+                    <p style="margin: 2px 0 0 0; font-size: 14px; font-weight: 900; color: #1e293b;">${rowVal}</p>
+                  </div>
+                  <div style="padding: 12px; border-radius: 12px; border: 1px solid #f1f5f9; background-color: #ffffff; text-align: left;">
+                    <span style="font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Seat</span>
+                    <p style="margin: 2px 0 0 0; font-size: 14px; font-weight: 900; color: #1e293b;">${seatVal}</p>
+                  </div>
+                  <div style="padding: 12px; border-radius: 12px; border: 1px solid #f1f5f9; background-color: #ffffff; text-align: left;">
+                    <span style="font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Type</span>
+                    <p style="margin: 2px 0 0 0; font-size: 14px; font-weight: 900; color: #4f46e5; text-transform: uppercase;">${ticketTypeVal}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top: 24px; margin-left: -24px; margin-right: -24px; margin-bottom: -24px; background-color: #0f172a; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; gap: 24px;">
+                  <div>
+                    <span style="display: block; font-size: 8px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em;">Booking ID</span>
+                    <span style="font-size: 12px; font-family: monospace; font-weight: 700; color: #ffffff;">${reg.registrationNumber}</span>
+                  </div>
+                  <div>
+                    <span style="display: block; font-size: 8px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em;">Booking Date</span>
+                    <span style="font-size: 12px; font-weight: 700; color: #ffffff;">${new Date(reg.registrationDate).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'})}</span>
+                  </div>
+                  <div>
+                    <span style="display: block; font-size: 8px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em;">Price</span>
+                    <span style="font-size: 12px; font-weight: 900; color: #34d399;">₹${totalPaidPrice.toFixed(2)}</span>
+                  </div>
+                </div>
+                <span style="font-size: 10px; font-weight: 600; color: #94a3b8;">Thank you for registering!</span>
+              </div>
+            </div>
+
+            <!-- Dashed divider -->
+            <div style="position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0 8px; background-color: #ffffff;">
+              <div style="height: 100%; border-left: 2px dashed #e2e8f0;"></div>
+            </div>
+
+            <!-- Right section (30%) -->
+            <div style="flex: 3; padding: 24px; background-color: #f8fafc; display: flex; flex-direction: column; justify-content: space-between; align-items: center; text-align: center;">
+              <div>
+                <span style="font-size: 10px; font-weight: 900; color: #94a3b8; letter-spacing: 0.25em; text-transform: uppercase;">Admit One</span>
+              </div>
+              
+              <div style="margin: 16px 0; padding: 8px; background-color: #ffffff; border-radius: 16px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
+                <img style="width: 112px; height: 112px; object-fit: contain;" src="data:image/png;base64,${reg.qrCodeBase64}" alt="Entry QR" />
+              </div>
+
+              <div style="width: 100%;">
+                <div style="padding: 6px 12px; background-color: #f1f5f9; border-radius: 12px; display: inline-block; border: 1px solid #e2e8f0;">
+                  <span style="display: block; font-size: 8px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em;">Registration ID</span>
+                  <span style="font-size: 10px; font-family: monospace; font-weight: 800; color: #334155;">${reg.registrationNumber}</span>
+                </div>
+                <div style="margin-top: 12px;">
+                  <span style="display: inline-block; padding: 2px 14px; border-radius: 9999px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; background-color: #ecfdf5; color: #047857; border: 1px solid #d1fae5;">
+                    Paid
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(ticketContainer);
+      await new Promise(resolve => setTimeout(resolve, 600));
+
+      const element = document.getElementById('ticket-capture-target');
+      const canvas = await window.html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'px',
+        format: [800, 320]
+      });
+
+      pdf.addImage(imgData, 'PNG', 0, 0, 800, 320);
+      pdf.save(`Ticket-${reg.registrationNumber}.pdf`);
+
+      document.body.removeChild(ticketContainer);
+      toast.success("Ticket PDF downloaded successfully!", { id: loadingToast });
+
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      toast.error("Direct PDF download failed. Falling back to print view...", { id: loadingToast });
+      fallbackPrintTicket(reg);
+    }
+  };
+
+  // Fallback to open new tab print view if libraries fail
+  const fallbackPrintTicket = (reg) => {
     const hasSeats = reg.seats && reg.seats.trim().length > 0;
     const seatList = hasSeats ? reg.seats.split(',') : [];
     const seatCount = seatList.length;
@@ -155,10 +331,7 @@ function MyRegistrations() {
           </style>
         </head>
         <body class="bg-slate-50 p-8 flex items-center justify-center min-h-screen">
-          
           <div class="w-full max-w-4xl bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden flex flex-row">
-            
-            <!-- Left section (70%) -->
             <div class="flex-[7] p-6 flex flex-col justify-between relative bg-gradient-to-br from-white to-slate-50/30">
               <div>
                 <div class="flex items-center justify-between gap-4">
@@ -171,20 +344,13 @@ function MyRegistrations() {
                     <span>${new Date(reg.event.date).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})}</span>
                   </div>
                 </div>
-
                 <div class="mt-4">
-                  <h3 class="text-xl font-black text-slate-800 tracking-tight leading-snug">
-                    ${reg.event.title}
-                  </h3>
-                  <p class="mt-1 text-xs font-semibold text-slate-400 tracking-wide">
-                    ${reg.event.category}
-                  </p>
+                  <h3 class="text-xl font-black text-slate-800 tracking-tight leading-snug">${reg.event.title}</h3>
+                  <p class="mt-1 text-xs font-semibold text-slate-400 tracking-wide">${reg.event.category}</p>
                 </div>
-
                 <div class="mt-3.5 flex items-center gap-2 text-xs text-slate-600 font-bold">
                   <span>📍 ${reg.event.location}</span>
                 </div>
-
                 <div class="grid grid-cols-4 gap-3 mt-6">
                   <div class="p-3 rounded-xl border border-slate-100 bg-white">
                     <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Gate</span>
@@ -204,7 +370,6 @@ function MyRegistrations() {
                   </div>
                 </div>
               </div>
-
               <div class="mt-6 -mx-6 -mb-6 bg-slate-900 px-6 py-4 flex items-center justify-between">
                 <div class="flex gap-x-6">
                   <div>
@@ -223,39 +388,27 @@ function MyRegistrations() {
                 <span class="text-[10px] font-semibold text-slate-400">Thank you for registering!</span>
               </div>
             </div>
-
-            <!-- Dashed divider -->
             <div class="relative flex flex-col justify-center items-center px-2 bg-white select-none">
               <div class="h-full border-l-2 border-dashed border-slate-200"></div>
-              <div class="absolute top-1/2 -left-3.5 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-50 border border-slate-200/80"></div>
-              <div class="absolute bottom-1/2 -right-3.5 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-50 border border-slate-200/80"></div>
             </div>
-
-            <!-- Right section (30%) -->
             <div class="flex-[3] p-6 bg-slate-50/50 flex flex-col justify-between items-center text-center">
               <div>
                 <span class="text-[10px] font-black text-slate-400 tracking-[0.25em] uppercase">Admit One</span>
               </div>
-              
               <div class="my-4 p-2 bg-white rounded-2xl border border-slate-150 shadow-md">
                 <img class="w-28 h-28 object-contain" src="data:image/png;base64,${reg.qrCodeBase64}" alt="Entry QR" />
               </div>
-
               <div class="w-full">
                 <div class="px-3 py-1.5 bg-slate-100 rounded-xl inline-block border border-slate-200/60">
                   <span class="block text-[8px] font-bold text-slate-400 uppercase tracking-widest">Registration ID</span>
                   <span class="text-[10px] font-mono font-extrabold text-slate-700">${reg.registrationNumber}</span>
                 </div>
                 <div class="mt-3">
-                  <span class="inline-block px-3.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-100">
-                    Paid
-                  </span>
+                  <span class="inline-block px-3.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-100">Paid</span>
                 </div>
               </div>
             </div>
-
           </div>
-
           <script>
             window.onload = function() {
               window.print();
