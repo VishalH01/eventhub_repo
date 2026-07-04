@@ -10,354 +10,257 @@ import {
   Users, 
   Cpu,
   MapPin,
-  Clock,
   Ticket,
-  ChevronRight
+  Search,
+  Zap,
+  Lock
 } from 'lucide-react';
 
 function Home() {
-  const [featuredEvents, setFeaturedEvents] = useState([]);
+  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [quickSearch, setQuickSearch] = useState('');
 
   // Retrieve user session info from localStorage
   const userJson = localStorage.getItem('user');
   const user = userJson ? JSON.parse(userJson) : null;
   const isAdmin = user && user.roles && user.roles.includes('ROLE_ADMIN');
 
-  // Fetch real events for the catalog on mount
   useEffect(() => {
-    const fetchFeatured = async () => {
+    const fetchEvents = async () => {
       try {
         const response = await API.get('/events');
-        // Take the first 3 events as featured items
-        setFeaturedEvents(response.data.slice(0, 3));
+        setEvents(response.data);
       } catch (err) {
-        console.error("Failed to load featured events for homepage:", err);
+        console.error("Failed to load events for homepage bento:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchFeatured();
+    fetchEvents();
   }, []);
 
-  return (
-    <div className="relative min-h-[90vh] bg-slate-900 text-slate-100 overflow-hidden flex flex-col justify-between">
-      
-      {/* ===================================================================
-          BACKGROUND CANVAS: Glowing gradient blobs for tech-startup aesthetics
-          =================================================================== */}
-      <div className="absolute top-10 left-10 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none animate-blob"></div>
-      <div className="absolute bottom-10 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px] pointer-events-none animate-blob [animation-delay:4s]"></div>
-      
-      {/* Decorative Grid Line System */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
+  // Filter events based on quick search
+  const filteredEvents = events.filter(evt => 
+    evt.title.toLowerCase().includes(quickSearch.toLowerCase()) ||
+    evt.category.toLowerCase().includes(quickSearch.toLowerCase())
+  ).slice(0, 3);
 
-      <div className="max-w-6xl mx-auto w-full px-6 md:px-8 py-16 relative z-10 flex-1 flex flex-col gap-24">
+  return (
+    <div className="relative min-h-[90vh] bg-[#090d16] text-slate-100 overflow-hidden flex flex-col justify-between font-sans">
+      
+      {/* Cinematic grid backdrop and colored ambient spheres */}
+      <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none"></div>
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-violet-600/5 rounded-full blur-[140px] pointer-events-none animate-blob"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-cyan-600/5 rounded-full blur-[140px] pointer-events-none animate-blob [animation-delay:6s]"></div>
+
+      <div className="max-w-6xl mx-auto w-full px-6 md:px-8 py-12 relative z-10 flex-1 flex flex-col gap-12">
         
+        {/* Top Header Row */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/60 pb-8">
+          <div className="text-left space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-violet-500/20 bg-violet-500/5 text-violet-400 text-[9px] font-black uppercase tracking-widest">
+              <Zap className="w-3 h-3 text-violet-400 animate-bounce" />
+              <span>EventHub Engine v2.0</span>
+            </div>
+            <h2 className="text-2xl font-black text-white tracking-tight">Interactive Event Console</h2>
+          </div>
+          <div className="flex items-center gap-3">
+            {user ? (
+              <span className="text-xs font-semibold text-slate-400">
+                Logged in as: <span className="text-violet-400 font-bold">{user.name}</span>
+              </span>
+            ) : (
+              <Link to="/register" className="px-4 py-2 bg-violet-650 hover:bg-violet-600 bg-violet-600 text-white text-xs font-bold rounded-xl transition">
+                Create Free Account
+              </Link>
+            )}
+          </div>
+        </div>
+
         {/* ===================================================================
-            1. HERO SECTION: Split Layout (Copy left, Floating glass pass right)
+            BENTO GRID LAYOUT (3 columns, responsive grid)
             =================================================================== */}
-        <div className="flex flex-col lg:flex-row gap-16 items-center justify-between min-h-[60vh]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
-          {/* Hero Copy (Left) */}
-          <div className="flex-[6] text-left space-y-6 animate-fade-in">
-            {/* Tagline Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-violet-500/20 bg-violet-500/5 text-violet-400 text-[10px] font-black uppercase tracking-widest">
-              <Sparkles className="w-3.5 h-3.5 text-violet-400 animate-spin" />
-              <span>Real-Time Venue Seating Engine</span>
+          {/* Box 1: Main Welcome & Search Hub (Col span 2, Row span 2) */}
+          <div className="md:col-span-2 md:row-span-2 bg-slate-900/30 border border-slate-800/80 rounded-3xl p-8 flex flex-col justify-between hover:border-violet-500/20 transition duration-300 relative overflow-hidden group">
+            <div className="space-y-4">
+              <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-none text-left">
+                Discover, Select Seats <br />
+                & Book <span className="bg-gradient-to-r from-violet-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">Instantly</span>
+              </h1>
+              <p className="text-slate-400 text-xs md:text-sm font-medium leading-relaxed max-w-lg text-left">
+                A unified dashboard built on Spring Boot & React. Search live listings, plan VIP coordinate seatings, and capture Base64 QR-code boarding tickets.
+              </p>
+            </div>
+
+            {/* In-Bento Live Search Box */}
+            <div className="mt-8 space-y-3">
+              <div className="relative w-full">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-450" />
+                <input
+                  type="text"
+                  placeholder="Quick search events catalog..."
+                  value={quickSearch}
+                  onChange={(e) => setQuickSearch(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 bg-slate-950/60 border border-slate-800/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 text-xs md:text-sm font-medium placeholder-slate-500"
+                />
+              </div>
+              <div className="flex gap-2.5">
+                <Link to="/events" className="px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition">
+                  <span>Open Full Catalog</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+                {user && (
+                  <Link to={isAdmin ? "/admin" : "/my-registrations"} className="px-5 py-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/60 text-slate-350 hover:text-white font-bold rounded-xl text-xs transition">
+                    {isAdmin ? "Manage Dashboard" : "My Bookings"}
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Box 2: Visual Seating Status Widget (Col span 1) */}
+          <div className="bg-slate-900/30 border border-slate-800/80 rounded-3xl p-6 hover:border-violet-500/20 transition duration-300 flex flex-col justify-between text-left">
+            <div>
+              <span className="text-[9px] font-black text-violet-400 uppercase tracking-widest block mb-2">Simulated Grids</span>
+              <h3 className="font-extrabold text-white text-base">VIP Row Seat Maps</h3>
+              <p className="text-slate-550 text-slate-450 text-[11px] leading-relaxed mt-1">
+                Verify seating rules (VIP front rows 1.5x premium, walkway aisle blockings) dynamically.
+              </p>
             </div>
             
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.05] max-w-2xl">
-              Connect, Register <br className="hidden md:inline" />
-              & Scan <span className="bg-gradient-to-r from-violet-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">Extraordinary</span> Events
-            </h1>
-
-            <p className="text-slate-400 text-sm md:text-base max-w-xl leading-relaxed font-medium">
-              An all-in-one developer & audience experience platform. Browse global events, select seating grids dynamically, complete sandbox payments, and fetch secure scan-ready boarding passes instantly.
-            </p>
-
-            {/* Context-aware CTA Actions */}
-            <div className="flex flex-wrap gap-4 pt-2">
-              {user ? (
-                <>
-                  <Link
-                    to="/events"
-                    className="hover-shine-parent group px-6 py-3.5 bg-gradient-to-r from-violet-650 to-indigo-650 bg-violet-600 hover:from-violet-600 hover:to-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-violet-500/10 transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"
-                  >
-                    <span>Browse Events Feed</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-                  </Link>
-                  <Link
-                    to={isAdmin ? "/admin" : "/my-registrations"}
-                    className="px-6 py-3.5 bg-slate-800/80 hover:bg-slate-800 text-slate-200 font-bold rounded-2xl border border-slate-700/60 shadow-sm transition-all duration-200 hover:-translate-y-0.5"
-                  >
-                    {isAdmin ? "Admin Console" : "My Boarding Passes"}
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/events"
-                    className="hover-shine-parent group px-6 py-3.5 bg-gradient-to-r from-violet-650 to-indigo-650 bg-violet-600 hover:from-violet-600 hover:to-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-violet-500/10 transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"
-                  >
-                    <span>Explore Event Catalog</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="px-6 py-3.5 bg-slate-800/80 hover:bg-slate-800 text-slate-200 font-bold rounded-2xl border border-slate-700/60 shadow-sm transition-all duration-200 hover:-translate-y-0.5"
-                  >
-                    Create Free Account
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Hero Graphic: Floating Glassmorphic Ticket Pass (Right) */}
-          <div className="flex-[5] w-full flex justify-center lg:justify-end">
-            <div className="animate-float w-full max-w-sm bg-slate-800/40 backdrop-blur-md rounded-3xl border border-slate-700/50 shadow-2xl p-6 relative hover-shine-parent cursor-default">
-              
-              {/* Header details */}
-              <div className="flex justify-between items-start border-b border-dashed border-slate-700 pb-4 mb-4">
-                <div>
-                  <span className="px-2 py-0.5 bg-violet-500/10 text-violet-400 text-[9px] font-black rounded-md tracking-wider uppercase border border-violet-500/10">Boarding Pass</span>
-                  <h4 className="font-extrabold text-white text-sm mt-2">Vite & Spring Boot Conf</h4>
-                  <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Hall 3, Mumbai Center</p>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs font-black text-violet-400 block">₹1,500.00</span>
-                  <span className="text-[8px] text-slate-500 font-black uppercase">Price (VIP)</span>
-                </div>
+            {/* Seating mini preview layout */}
+            <div className="bg-slate-950/50 p-3 rounded-xl border border-slate-800/60 mt-4">
+              <div className="grid grid-cols-5 gap-1">
+                <span className="h-4 bg-amber-500 rounded text-[7px] text-white flex items-center justify-center font-black">A1</span>
+                <span className="h-4 bg-amber-500 rounded text-[7px] text-white flex items-center justify-center font-black">A2</span>
+                <span className="h-4 bg-slate-800 rounded"></span>
+                <span className="h-4 bg-slate-850 text-slate-600 text-[7px] flex items-center justify-center font-black">✕</span>
+                <span className="h-4 bg-slate-850 text-slate-600 text-[7px] flex items-center justify-center font-black">✕</span>
               </div>
+            </div>
+          </div>
 
-              {/* Graphic Seat Selection Layout preview */}
-              <div className="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/80 mb-4">
-                <div className="flex justify-between text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2">
-                  <span>Selected Seats</span>
-                  <span className="text-amber-500 font-bold">Row A-1, A-2</span>
-                </div>
-                <div className="grid grid-cols-6 gap-1.5 opacity-80">
-                  <span className="h-4 bg-amber-500 rounded text-[8px] text-white flex items-center justify-center font-black">A1</span>
-                  <span className="h-4 bg-amber-500 rounded text-[8px] text-white flex items-center justify-center font-black">A2</span>
-                  <span className="h-4 bg-slate-800 rounded"></span>
-                  <span className="h-4 bg-slate-800 rounded"></span>
-                  <span className="h-4 bg-slate-750 text-slate-600 text-[8px] flex items-center justify-center font-black">✕</span>
-                  <span className="h-4 bg-slate-750 text-slate-600 text-[8px] flex items-center justify-center font-black">✕</span>
-                </div>
+          {/* Box 3: Cryptographic Razorpay Payments Widget (Col span 1) */}
+          <div className="bg-slate-900/30 border border-slate-800/80 rounded-3xl p-6 hover:border-violet-500/20 transition duration-300 flex flex-col justify-between text-left">
+            <div>
+              <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest block mb-2">Secure Sandbox</span>
+              <h3 className="font-extrabold text-white text-base">Razorpay Payments</h3>
+              <p className="text-slate-450 text-[11px] leading-relaxed mt-1">
+                Order IDs compiled on backend nodes and cryptographically verified on callback via SHA-256 signatures.
+              </p>
+            </div>
+            
+            <div className="mt-4 flex items-center justify-between text-xs font-semibold text-slate-450 border-t border-slate-800/60 pt-3">
+              <span className="flex items-center gap-1"><Lock className="w-3.5 h-3.5 text-emerald-450 text-emerald-400" /> SECURE</span>
+              <span className="text-[10px] text-emerald-400 font-black tracking-wider bg-emerald-500/5 px-2 py-0.5 rounded border border-emerald-500/10">VERIFIED</span>
+            </div>
+          </div>
+
+          {/* Box 4: Interactive Live Events Catalog Slider (Col span 3) */}
+          <div className="md:col-span-3 bg-slate-900/30 border border-slate-800/80 rounded-3xl p-6 hover:border-violet-500/20 transition duration-300 flex flex-col gap-6 text-left">
+            <div className="flex justify-between items-center border-b border-slate-850 pb-4">
+              <div>
+                <span className="text-[9px] font-black text-violet-400 uppercase tracking-widest block">Real-Time Data Feed</span>
+                <h3 className="font-extrabold text-white text-base mt-0.5">Upcoming Live Events</h3>
               </div>
+              <span className="text-[10px] font-black text-slate-500 bg-slate-950 px-2.5 py-1 rounded-md border border-slate-800">
+                FOUND: {filteredEvents.length}
+              </span>
+            </div>
 
-              {/* Barcode / Scan Indicator */}
-              <div className="flex justify-between items-center bg-slate-950 p-3.5 rounded-2xl border border-slate-800/40">
-                <div>
-                  <span className="text-[8px] text-slate-500 font-bold block">SCAN FOR ENTRANCE</span>
-                  <span className="text-[10px] font-mono font-bold text-slate-350 tracking-wider">EVT2026-BOARD</span>
-                </div>
-                <div className="w-10 h-10 bg-white p-1 rounded-lg flex items-center justify-center">
-                  <QrCode className="w-8 h-8 text-slate-900" />
-                </div>
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-44 bg-slate-800/40 border border-slate-700/30 rounded-2xl animate-pulse"></div>
+                ))}
               </div>
-
-            </div>
-          </div>
-        </div>
-
-        {/* ===================================================================
-            2. STATS BAR: Live Platform Metrics
-            =================================================================== */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-slate-850/40 backdrop-blur-sm p-6 rounded-3xl border border-slate-800/60 shadow-sm text-center">
-          <div>
-            <span className="block text-2xl md:text-3xl font-black text-white">450+</span>
-            <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mt-1 block">Events Hosted</span>
-          </div>
-          <div>
-            <span className="block text-2xl md:text-3xl font-black text-violet-400">12k+</span>
-            <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mt-1 block">Tickets Scanned</span>
-          </div>
-          <div>
-            <span className="block text-2xl md:text-3xl font-black text-white">100%</span>
-            <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mt-1 block">Secure Payments</span>
-          </div>
-          <div>
-            <span className="block text-2xl md:text-3xl font-black text-emerald-450 text-emerald-400">99.9%</span>
-            <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mt-1 block">Uptime SLA</span>
-          </div>
-        </div>
-
-        {/* ===================================================================
-            3. FEATURED EVENTS: Real Data binds from backend
-            =================================================================== */}
-        <div>
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10">
-            <div className="text-left space-y-1">
-              <span className="text-[10px] font-black text-violet-400 uppercase tracking-widest">Live Schedule</span>
-              <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">Featured Event Listings</h2>
-            </div>
-            <Link to="/events" className="text-xs font-bold text-violet-400 hover:text-violet-300 flex items-center gap-1 mt-2 md:mt-0 transition">
-              Browse Entire Feed ({featuredEvents.length}) <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="h-72 bg-slate-800/40 border border-slate-700/30 rounded-3xl animate-pulse"></div>
-              ))}
-            </div>
-          ) : featuredEvents.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-              {featuredEvents.map(evt => (
-                <div key={evt.id} className="bg-slate-800/30 backdrop-blur-sm rounded-3xl border border-slate-800 overflow-hidden shadow-sm hover:shadow-xl hover:border-violet-500/30 hover:-translate-y-1.5 transition-all duration-200 flex flex-col justify-between group">
-                  <div>
-                    {/* Event Cover Image */}
-                    <div className="h-40 w-full overflow-hidden bg-slate-900 relative">
-                      {evt.imageUrl ? (
-                        <img 
-                          src={evt.imageUrl} 
-                          alt={evt.title} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90 group-hover:opacity-100"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-4xl bg-slate-800">📅</div>
-                      )}
-                      <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-slate-900/90 backdrop-blur-sm text-[9px] font-black text-violet-455 text-violet-400 rounded-md uppercase tracking-wider border border-violet-500/10">
-                        {evt.category}
-                      </span>
-                    </div>
-
-                    {/* Card Content details */}
-                    <div className="p-5">
-                      <h3 className="font-extrabold text-white text-base leading-snug line-clamp-1 group-hover:text-violet-400 transition">
-                        {evt.title}
-                      </h3>
+            ) : filteredEvents.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {filteredEvents.map(evt => (
+                  <div key={evt.id} className="bg-slate-950/40 border border-slate-850 p-4 rounded-2xl flex flex-col justify-between hover:border-violet-500/20 hover:bg-slate-950/80 transition duration-150 group">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="px-2 py-0.5 bg-violet-500/10 text-violet-455 text-violet-400 border border-violet-500/10 text-[8px] font-black rounded-md uppercase tracking-wider">
+                          {evt.category}
+                        </span>
+                        <span className="text-[10px] font-black text-slate-400">₹{evt.price.toFixed(0)}</span>
+                      </div>
                       
-                      <div className="mt-3.5 space-y-2 text-xs font-semibold text-slate-400">
+                      <h4 className="font-extrabold text-white text-sm line-clamp-1 group-hover:text-violet-400 transition">{evt.title}</h4>
+                      
+                      <div className="space-y-1 text-[10px] text-slate-500 font-semibold">
                         <div className="flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5 text-violet-400" />
-                          <span>{new Date(evt.date).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'})}</span>
+                          <Calendar className="w-3 h-3 text-slate-500" />
+                          <span>{new Date(evt.date).toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5 text-violet-400 shrink-0" />
-                          <span className="line-clamp-1">{evt.location}</span>
+                          <MapPin className="w-3 h-3 text-slate-500 shrink-0" />
+                          <span className="truncate max-w-[150px]">{evt.location}</span>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Card bottom actions */}
-                  <div className="p-5 pt-0 border-t border-slate-800/60 mt-4 flex items-center justify-between">
-                    <div>
-                      <span className="text-[8px] text-slate-500 font-bold block uppercase">Tickets from</span>
-                      <span className="text-sm font-black text-white">₹{evt.price.toFixed(2)}</span>
-                    </div>
-                    <Link
-                      to={`/events/${evt.id}`}
-                      className="px-3.5 py-2 bg-slate-800 hover:bg-violet-600 text-slate-200 hover:text-white text-xs font-black rounded-xl transition duration-150 flex items-center gap-1"
-                    >
-                      <span>Book Now</span>
+                    <Link to={`/events/${evt.id}`} className="mt-4 px-3 py-2 bg-slate-900 group-hover:bg-violet-600 text-slate-300 group-hover:text-white text-[10px] font-black rounded-xl text-center transition flex items-center justify-center gap-1">
+                      <span>Get Passes</span>
                       <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
-
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="bg-slate-800/20 py-12 px-6 rounded-3xl border border-slate-800 text-center text-slate-500 text-xs font-medium">
-              🎟️ No active events found in the database. Seed events inside the Admin panel first!
-            </div>
-          )}
-        </div>
-
-        {/* ===================================================================
-            4. WORKFLOW: How it works step-by-step
-            =================================================================== */}
-        <div>
-          <div className="text-center max-w-2xl mx-auto mb-16 space-y-1">
-            <span className="text-[10px] font-black text-violet-400 uppercase tracking-widest">Interactive Blueprint</span>
-            <h2 className="text-2xl md:text-3xl font-black text-white">How the Platform Works</h2>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6 text-slate-500 text-xs font-semibold">
+                No active events match your quick search criteria.
+              </div>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Box 5: QR Ticketer Boarding Pass Pass Wallet (Col span 1) */}
+          <div className="bg-slate-900/30 border border-slate-800/80 rounded-3xl p-6 hover:border-violet-500/20 transition duration-300 flex flex-col justify-between text-left">
+            <div>
+              <span className="text-[9px] font-black text-violet-400 uppercase tracking-widest block mb-2">Dynamic Compilation</span>
+              <h3 className="font-extrabold text-white text-base">QR Boarding Tickets</h3>
+              <p className="text-slate-450 text-[11px] leading-relaxed mt-1">
+                ZXing engine compiles attendee registration metrics on-demand into base64 data image arrays.
+              </p>
+            </div>
             
-            {/* Step 1 */}
-            <div className="flex flex-col gap-4 text-left p-6 bg-slate-850/20 border border-slate-800/80 rounded-3xl hover:border-violet-500/20 transition group">
-              <span className="text-3xl font-black text-slate-700 group-hover:text-violet-500/20 transition duration-200">01</span>
-              <h4 className="font-extrabold text-white text-sm">Discover Sessions</h4>
-              <p className="text-slate-450 text-xs leading-relaxed">
-                Filter through live technographic summits, music stages, and layout specs.
-              </p>
+            <div className="mt-4 flex items-center justify-center bg-slate-950 p-2.5 rounded-xl border border-slate-800/50">
+              <QrCode className="w-12 h-12 text-slate-400 animate-pulse" />
             </div>
-
-            {/* Step 2 */}
-            <div className="flex flex-col gap-4 text-left p-6 bg-slate-850/20 border border-slate-800/80 rounded-3xl hover:border-violet-500/20 transition group">
-              <span className="text-3xl font-black text-slate-700 group-hover:text-violet-500/20 transition duration-200">02</span>
-              <h4 className="font-extrabold text-white text-sm">Interactive Seating</h4>
-              <p className="text-slate-450 text-xs leading-relaxed">
-                Select coordinate bounds including VIP front rows, walkway blockings, and real-time status.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="flex flex-col gap-4 text-left p-6 bg-slate-850/20 border border-slate-800/80 rounded-3xl hover:border-violet-500/20 transition group">
-              <span className="text-3xl font-black text-slate-700 group-hover:text-violet-500/20 transition duration-200">03</span>
-              <h4 className="font-extrabold text-white text-sm">Sandbox Checkout</h4>
-              <p className="text-slate-450 text-xs leading-relaxed">
-                Execute sandboxed test payments via Razorpay verify, validated securely on backend layers.
-              </p>
-            </div>
-
-            {/* Step 4 */}
-            <div className="flex flex-col gap-4 text-left p-6 bg-slate-850/20 border border-slate-800/80 rounded-3xl hover:border-violet-500/20 transition group">
-              <span className="text-3xl font-black text-slate-700 group-hover:text-violet-500/20 transition duration-200">04</span>
-              <h4 className="font-extrabold text-white text-sm">Download pass</h4>
-              <p className="text-slate-450 text-xs leading-relaxed">
-                Fetch scan-ready boarding cards compiled dynamically via backend ZXing QR algorithms.
-              </p>
-            </div>
-
           </div>
-        </div>
 
-        {/* ===================================================================
-            5. GRADIENT CALL-TO-ACTION CARD
-            =================================================================== */}
-        <div className="bg-gradient-to-r from-violet-750 via-indigo-700 to-indigo-850 bg-violet-700 p-8 md:p-12 rounded-3xl text-white text-center shadow-2xl relative overflow-hidden group border border-violet-500/20">
-          {/* Glass shine hover effect */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none"></div>
-
-          <span className="text-[10px] font-black text-violet-200 uppercase tracking-widest">Connect Instantly</span>
-          <h2 className="text-2xl md:text-4xl font-black mt-2 leading-tight">Ready to Book Your Next Session?</h2>
-          <p className="text-xs md:text-sm text-indigo-150 max-w-md mx-auto mt-3 leading-relaxed">
-            Create an attendee account in seconds, select live seating configurations, and claim your entrance QR passes.
-          </p>
-          <div className="mt-8 flex justify-center">
-            <Link
-              to="/events"
-              className="px-8 py-3.5 bg-white hover:bg-slate-50 text-indigo-800 font-extrabold rounded-2xl text-xs shadow-md transition hover:-translate-y-0.5"
-            >
-              Browse Live Feed
-            </Link>
+          {/* Box 6: Modular System Architecture (Col span 2) */}
+          <div className="md:col-span-2 bg-slate-900/30 border border-slate-800/80 rounded-3xl p-6 hover:border-violet-500/20 transition duration-300 flex flex-col justify-between text-left">
+            <div>
+              <span className="text-[9px] font-black text-violet-400 uppercase tracking-widest block mb-2">Core Pipeline</span>
+              <h3 className="font-extrabold text-white text-base">Full-Stack Framework Integration</h3>
+              <p className="text-slate-450 text-[11px] leading-relaxed mt-1">
+                Engineered with Spring Boot Security (JWT authentication filters, CORS mapping matrices), Maven dependency management, and React Router bindings.
+              </p>
+            </div>
+            
+            <div className="mt-4 flex flex-wrap gap-4 text-[10px] font-black text-slate-450 uppercase tracking-widest border-t border-slate-800/60 pt-4">
+              <div className="flex items-center gap-1.5"><Cpu className="w-3.5 h-3.5 text-slate-500" /> SPRING SECURITY</div>
+              <div className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-slate-500" /> RBAC ROLES</div>
+              <div className="flex items-center gap-1.5"><Ticket className="w-3.5 h-3.5 text-slate-500" /> SEATING ENGINE</div>
+            </div>
           </div>
+
         </div>
 
       </div>
 
       {/* Trust Footer */}
       <div className="bg-slate-950 border-t border-slate-850 py-6 text-center">
-        <div className="max-w-6xl mx-auto px-6 flex flex-wrap gap-6 justify-center items-center opacity-50 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-          <div className="flex items-center gap-1.5">
-            <Cpu className="w-3.5 h-3.5 text-slate-500" />
-            <span>Spring Security JWT</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Users className="w-3.5 h-3.5 text-slate-500" />
-            <span>Role-Based RBAC</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 text-slate-500" />
-            <span>Razorpay Verify</span>
-          </div>
+        <div className="max-w-6xl mx-auto px-6 flex flex-wrap gap-6 justify-center items-center opacity-40 text-[9px] font-black text-slate-500 uppercase tracking-widest">
+          <span>Spring Security JWT</span>
+          <span>•</span>
+          <span>Role-Based RBAC</span>
+          <span>•</span>
+          <span>Razorpay Verify</span>
         </div>
       </div>
 
