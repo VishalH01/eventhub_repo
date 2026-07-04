@@ -15,6 +15,7 @@ import {
 
 function Home() {
   const [featuredEvents, setFeaturedEvents] = useState([]);
+  const [latestEvent, setLatestEvent] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Retrieve user session info from localStorage
@@ -29,6 +30,12 @@ function Home() {
         const response = await API.get('/events');
         // Take the first 3 events as featured items
         setFeaturedEvents(response.data.slice(0, 3));
+        
+        // Find the newly/latest added event: sort by ID descending (highest ID first)
+        if (response.data && response.data.length > 0) {
+          const sorted = [...response.data].sort((a, b) => b.id - a.id);
+          setLatestEvent(sorted[0]);
+        }
       } catch (err) {
         console.error("Failed to load featured events for homepage:", err);
       } finally {
@@ -37,6 +44,14 @@ function Home() {
     };
     fetchFeatured();
   }, []);
+
+  const displayTitle = latestEvent ? latestEvent.title : "Vite & Spring Boot Conf";
+  const displayLocation = latestEvent ? latestEvent.location : "Hall 1, Convention Center";
+  const isVipLayout = latestEvent ? latestEvent.seatingLayout === 'VIP_FRONT' : true;
+  const basePrice = latestEvent ? latestEvent.price : 1000;
+  const displayPrice = isVipLayout ? basePrice * 1.5 : basePrice;
+  const displayLabel = isVipLayout ? "Price (VIP)" : "Price (Standard)";
+  const displayCode = latestEvent ? `EVT-${latestEvent.id}` : "EVT2026-BOARD";
 
   return (
     <div className="relative min-h-[85vh] bg-slate-50/20 overflow-hidden flex flex-col justify-between animate-fade-in-up">
@@ -111,12 +126,12 @@ function Home() {
               <div className="flex justify-between items-start border-b border-dashed border-slate-200 pb-4 mb-4">
                 <div>
                   <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[9px] font-black rounded-md tracking-wider uppercase border border-indigo-100">Boarding Pass</span>
-                  <h4 className="font-extrabold text-slate-800 text-sm mt-2">Vite & Spring Boot Conf</h4>
-                  <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Hall 1, Convention Center</p>
+                  <h4 className="font-extrabold text-slate-800 text-sm mt-2 line-clamp-1">{displayTitle}</h4>
+                  <p className="text-[10px] text-slate-450 font-semibold mt-0.5 line-clamp-1">{displayLocation}</p>
                 </div>
-                <div className="text-right">
-                  <span className="text-xs font-black text-indigo-600 block">₹1,500.00</span>
-                  <span className="text-[8px] text-slate-400 font-black uppercase">Price (VIP)</span>
+                <div className="text-right shrink-0">
+                  <span className="text-xs font-black text-indigo-600 block">₹{displayPrice.toFixed(2)}</span>
+                  <span className="text-[8px] text-slate-400 font-black uppercase">{displayLabel}</span>
                 </div>
               </div>
 
@@ -124,13 +139,13 @@ function Home() {
               <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 mb-4">
                 <div className="flex justify-between text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
                   <span>Selected Seats</span>
-                  <span className="text-indigo-600 font-bold">Row A-1, A-2</span>
+                  <span className="text-indigo-600 font-bold">{isVipLayout ? "Row A-1, A-2" : "Row C-3, C-4"}</span>
                 </div>
                 <div className="grid grid-cols-6 gap-1.5">
-                  <span className="h-4 bg-indigo-600 rounded text-[8px] text-white flex items-center justify-center font-black">A1</span>
-                  <span className="h-4 bg-indigo-600 rounded text-[8px] text-white flex items-center justify-center font-black">A2</span>
-                  <span className="h-4 bg-slate-200 rounded"></span>
-                  <span className="h-4 bg-slate-200 rounded"></span>
+                  <span className={`h-4 rounded text-[8px] text-white flex items-center justify-center font-black ${isVipLayout ? "bg-indigo-600 animate-pulse" : "bg-slate-205 bg-slate-200"}`}>{isVipLayout ? "A1" : ""}</span>
+                  <span className={`h-4 rounded text-[8px] text-white flex items-center justify-center font-black ${isVipLayout ? "bg-indigo-600 animate-pulse" : "bg-slate-205 bg-slate-200"}`}>{isVipLayout ? "A2" : ""}</span>
+                  <span className={`h-4 rounded text-[8px] text-white flex items-center justify-center font-black ${!isVipLayout ? "bg-indigo-600 animate-pulse" : "bg-slate-205 bg-slate-200"}`}>{!isVipLayout ? "C3" : ""}</span>
+                  <span className={`h-4 rounded text-[8px] text-white flex items-center justify-center font-black ${!isVipLayout ? "bg-indigo-600 animate-pulse" : "bg-slate-205 bg-slate-200"}`}>{!isVipLayout ? "C4" : ""}</span>
                   <span className="h-4 bg-slate-100 text-slate-400 text-[8px] flex items-center justify-center font-black">✕</span>
                   <span className="h-4 bg-slate-100 text-slate-400 text-[8px] flex items-center justify-center font-black">✕</span>
                 </div>
@@ -140,9 +155,9 @@ function Home() {
               <div className="flex justify-between items-center bg-slate-900 text-white p-3.5 rounded-2xl">
                 <div>
                   <span className="text-[8px] text-slate-400 font-bold block">SCAN TO ENTER</span>
-                  <span className="text-[10px] font-mono font-bold tracking-wider">EVT2026-BOARD</span>
+                  <span className="text-[10px] font-mono font-bold tracking-wider">{displayCode}</span>
                 </div>
-                <div className="w-10 h-10 bg-white p-1 rounded-lg flex items-center justify-center border border-slate-800">
+                <div className="w-10 h-10 bg-white p-1 rounded-lg flex items-center justify-center border border-slate-805 border-slate-800">
                   <QrCode className="w-8 h-8 text-slate-900" />
                 </div>
               </div>
