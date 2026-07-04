@@ -47,8 +47,8 @@ function SeatSelectionModal({
   const totalAmount = selectedSeats.reduce((sum, seat) => sum + calculateSeatPrice(seat), 0);
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 transition-all duration-300">
-      <div className="bg-white border border-slate-100 rounded-3xl shadow-2xl max-w-4xl w-full flex flex-col md:flex-row overflow-y-auto md:overflow-hidden animate-scale-up max-h-[95vh] md:max-h-[90vh]">
+    <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-md z-50 flex items-center justify-center p-3 md:p-4 transition-all duration-300">
+      <div className="bg-white border border-slate-100 rounded-3xl shadow-2xl max-w-5xl w-[95%] md:w-full flex flex-col md:flex-row overflow-y-auto md:overflow-hidden animate-scale-up max-h-[95vh] md:max-h-[90vh]">
         
         {/* Left Side: Seat Layout Grid */}
         <div className="flex-1 p-5 md:p-8 flex flex-col justify-between overflow-y-auto bg-white min-h-[450px] md:min-h-0">
@@ -75,7 +75,7 @@ function SeatSelectionModal({
             </div>
 
             {/* Grid Container */}
-            <div className="flex flex-col gap-2 md:gap-3.5 items-center justify-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden py-3 md:py-4 bg-slate-55 bg-slate-50/50 p-3 md:p-6 rounded-2xl border border-slate-150 max-w-full">
+            <div className="flex flex-col gap-2 md:gap-3 items-center justify-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden py-3 md:py-4 bg-slate-50/50 p-4 md:p-6 rounded-2xl border border-slate-150 max-w-full w-full">
               {rows.map((rowLabel, rIndex) => {
                 return (
                   <div key={rowLabel} className="flex gap-2 md:gap-3 items-center min-w-max">
