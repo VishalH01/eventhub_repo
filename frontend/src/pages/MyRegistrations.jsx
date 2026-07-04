@@ -295,7 +295,7 @@ function MyRegistrations() {
   }
 
   return (
-    <div className="py-8 max-w-6xl mx-auto px-4 space-y-8">
+    <div className="py-8 max-w-6xl mx-auto px-4 space-y-8 animate-fade-in-up">
       {/* Header */}
       <div className="text-left space-y-2 animate-fade-in">
         <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-50 text-indigo-700 uppercase tracking-widest">

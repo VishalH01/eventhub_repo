@@ -191,7 +191,7 @@ function AdminDashboard() {
   }
 
   return (
-    <div className="py-8 max-w-6xl mx-auto px-4 relative">
+    <div className="py-8 max-w-6xl mx-auto px-4 relative animate-fade-in-up">
 
       <div className="relative z-10 space-y-8">
         

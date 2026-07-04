@@ -46,7 +46,7 @@ function Events() {
   }, [searchTerm, selectedCategory]);
 
   return (
-    <div className="relative min-h-[85vh] py-8 max-w-6xl mx-auto px-4">
+    <div className="relative min-h-[85vh] py-8 max-w-6xl mx-auto px-4 animate-fade-in-up">
       {/* Background ambient decorations */}
       <div className="absolute top-10 left-1/4 w-72 h-72 bg-indigo-100/30 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
 

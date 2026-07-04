@@ -39,7 +39,7 @@ function Home() {
   }, []);
 
   return (
-    <div className="relative min-h-[85vh] bg-slate-50/20 overflow-hidden flex flex-col justify-between">
+    <div className="relative min-h-[85vh] bg-slate-50/20 overflow-hidden flex flex-col justify-between animate-fade-in-up">
       
       {/* Clean matching background with no multi-colored ambient blobs */}
       <div className="max-w-6xl mx-auto w-full px-6 md:px-8 py-12 relative z-10 flex-1 flex flex-col gap-20">

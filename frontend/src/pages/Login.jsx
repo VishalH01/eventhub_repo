@@ -42,7 +42,7 @@ function Login() {
   };
 
   return (
-    <div className="relative flex items-center justify-center min-h-[80vh] px-4 py-12 bg-slate-50/20 overflow-hidden">
+    <div className="relative flex items-center justify-center min-h-[80vh] px-4 py-12 bg-slate-50/20 overflow-hidden animate-fade-in-up">
       
       {/* Background decorations */}
       <div className="absolute top-10 left-10 w-80 h-80 bg-indigo-200/20 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
