@@ -95,5 +95,23 @@ public class DatabaseSeeder implements CommandLineRunner {
             musicFest.setTotalCapacity(60);
             eventRepository.save(musicFest);
         }
+
+        // 5. Seed a new event with a different seat layout for dynamic hero ticket verification
+        if (!eventRepository.existsByTitle("Global Tech Summit 2026")) {
+            Event globalTech = new Event();
+            globalTech.setTitle("Global Tech Summit 2026");
+            globalTech.setDescription("Explore next-generation web technologies, edge compilation, and dynamic cloud state management systems.");
+            globalTech.setLocation("Seattle Convention Center, WA");
+            globalTech.setDate(LocalDateTime.now().plusDays(30));
+            globalTech.setPrice(1200.00);
+            globalTech.setCategory("Tech");
+            globalTech.setImageUrl("https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800");
+            globalTech.setSeatingLayout("CENTER_AISLE");
+            globalTech.setSeatingRows(8);
+            globalTech.setSeatingCols(12);
+            globalTech.setTotalCapacity(96);
+            eventRepository.save(globalTech);
+            System.out.println("[DatabaseSeeder] Successfully seeded dynamic test event 'Global Tech Summit 2026'!");
+        }
     }
 }
