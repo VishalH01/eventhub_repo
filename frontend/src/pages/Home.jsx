@@ -10,9 +10,7 @@ import {
   Users, 
   Cpu,
   MapPin,
-  Clock,
-  Ticket,
-  ChevronRight
+  Ticket
 } from 'lucide-react';
 
 function Home() {
@@ -41,40 +39,30 @@ function Home() {
   }, []);
 
   return (
-    <div className="relative min-h-[90vh] bg-slate-50/60 overflow-hidden flex flex-col justify-between">
+    <div className="relative min-h-[85vh] bg-slate-50/20 overflow-hidden flex flex-col justify-between">
       
-      {/* ===================================================================
-          BACKGROUND DECORATIONS: Pastel glowing circles for light-theme aesthetics
-          =================================================================== */}
-      <div className="absolute top-10 left-10 w-96 h-96 bg-indigo-200/30 rounded-full blur-[100px] pointer-events-none animate-blob"></div>
-      <div className="absolute bottom-10 right-10 w-96 h-96 bg-violet-200/30 rounded-full blur-[100px] pointer-events-none animate-blob [animation-delay:5s]"></div>
-      
-      {/* Subtle Grid Backdrop overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000003_1px,transparent_1px),linear-gradient(to_bottom,#00000003_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
-
-      <div className="max-w-6xl mx-auto w-full px-6 md:px-8 py-16 relative z-10 flex-1 flex flex-col gap-24">
+      {/* Clean matching background with no multi-colored ambient blobs */}
+      <div className="max-w-6xl mx-auto w-full px-6 md:px-8 py-12 relative z-10 flex-1 flex flex-col gap-20">
         
         {/* ===================================================================
-            1. HERO SECTION: Split Layout (Copy Left, Premium Glass Ticket Right)
+            1. HERO SECTION: Split Layout (Indigo Branding)
             =================================================================== */}
-        <div className="flex flex-col lg:flex-row gap-16 items-center justify-between min-h-[60vh]">
+        <div className="flex flex-col lg:flex-row gap-16 items-center justify-between min-h-[55vh]">
           
           {/* Hero Left: Copy & Actions */}
           <div className="flex-[6] text-left space-y-6 animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-100 bg-indigo-50/80 text-indigo-700 text-[10px] font-black uppercase tracking-widest">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-500 animate-spin" />
-              <span>Discover & Book Seating Live</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-100 bg-indigo-50 text-indigo-700 text-[10px] font-black uppercase tracking-widest">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Real-Time Seating Engine</span>
             </div>
             
             <h1 className="text-4xl md:text-6xl font-black text-slate-800 tracking-tight leading-[1.05] max-w-2xl">
-              Connect, Register & Scan <br />
-              <span className="bg-gradient-to-r from-indigo-650 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                Extraordinary Events
-              </span>
+              Connect, Register <br />
+              & Scan <span className="text-indigo-600">EventHub</span> Passes
             </h1>
 
             <p className="text-slate-500 text-sm md:text-base max-w-xl leading-relaxed font-medium">
-              The ultimate workspace to browse Technical summits, choose VIP/Standard seat layouts dynamically, complete secure sandbox payments, and print boarding passes equipped with scan-ready QR codes.
+              A premium, streamlined event workspace. Search catalog listings, select VIP or Standard seat rows on active grids, complete payments, and download QR boarding tickets.
             </p>
 
             {/* Context-aware Buttons */}
@@ -83,14 +71,14 @@ function Home() {
                 <>
                   <Link
                     to="/events"
-                    className="hover-shine-parent group px-6 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/10 transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"
+                    className="hover-shine-parent group px-6 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-md transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"
                   >
                     <span>Browse Events Feed</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
                   </Link>
                   <Link
                     to={isAdmin ? "/admin" : "/my-registrations"}
-                    className="px-6 py-3.5 bg-white hover:bg-slate-50 text-slate-700 font-bold rounded-2xl border border-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-0.5"
+                    className="px-6 py-3.5 bg-white hover:bg-slate-100 text-slate-700 font-bold rounded-2xl border border-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-0.5"
                   >
                     {isAdmin ? "Admin Console" : "My Boarding Passes"}
                   </Link>
@@ -99,14 +87,14 @@ function Home() {
                 <>
                   <Link
                     to="/events"
-                    className="hover-shine-parent group px-6 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/10 transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"
+                    className="hover-shine-parent group px-6 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-md transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5"
                   >
                     <span>Explore Event Catalog</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
                   </Link>
                   <Link
                     to="/register"
-                    className="px-6 py-3.5 bg-white hover:bg-slate-50 text-indigo-650 font-bold rounded-2xl border border-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-0.5"
+                    className="px-6 py-3.5 bg-white hover:bg-slate-100 text-indigo-650 font-bold rounded-2xl border border-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-0.5"
                   >
                     Create Free Account
                   </Link>
@@ -115,14 +103,14 @@ function Home() {
             </div>
           </div>
 
-          {/* Hero Right: Premium Glassmorphic Ticket Mockup */}
+          {/* Hero Right: Premium Glassmorphic Ticket Mockup (Indigo-toned) */}
           <div className="flex-[5] w-full flex justify-center lg:justify-end">
-            <div className="animate-float w-full max-w-sm bg-white rounded-3xl border border-slate-200/80 shadow-2xl p-6 relative hover-shine-parent cursor-default">
+            <div className="animate-float w-full max-w-sm bg-white rounded-3xl border border-slate-200 shadow-lg p-6 relative hover-shine-parent cursor-default">
               
               {/* Header details */}
               <div className="flex justify-between items-start border-b border-dashed border-slate-200 pb-4 mb-4">
                 <div>
-                  <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[9px] font-black rounded-md tracking-wider uppercase border border-indigo-100">Boarding Ticket</span>
+                  <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[9px] font-black rounded-md tracking-wider uppercase border border-indigo-100">Boarding Pass</span>
                   <h4 className="font-extrabold text-slate-800 text-sm mt-2">Vite & Spring Boot Conf</h4>
                   <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Hall 1, Convention Center</p>
                 </div>
@@ -132,19 +120,19 @@ function Home() {
                 </div>
               </div>
 
-              {/* Graphic Seat Selection Layout preview */}
+              {/* Graphic Seat Selection Layout preview (Indigo theme) */}
               <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 mb-4">
                 <div className="flex justify-between text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
                   <span>Selected Seats</span>
-                  <span className="text-amber-500 font-bold">Row A-1, A-2</span>
+                  <span className="text-indigo-600 font-bold">Row A-1, A-2</span>
                 </div>
                 <div className="grid grid-cols-6 gap-1.5">
-                  <span className="h-4 bg-amber-500 rounded text-[8px] text-white flex items-center justify-center font-black animate-pulse">A1</span>
-                  <span className="h-4 bg-amber-500 rounded text-[8px] text-white flex items-center justify-center font-black animate-pulse">A2</span>
+                  <span className="h-4 bg-indigo-600 rounded text-[8px] text-white flex items-center justify-center font-black">A1</span>
+                  <span className="h-4 bg-indigo-600 rounded text-[8px] text-white flex items-center justify-center font-black">A2</span>
                   <span className="h-4 bg-slate-200 rounded"></span>
                   <span className="h-4 bg-slate-200 rounded"></span>
-                  <span className="h-4 bg-red-50 text-red-500 text-[8px] flex items-center justify-center font-black">✕</span>
-                  <span className="h-4 bg-red-50 text-red-500 text-[8px] flex items-center justify-center font-black">✕</span>
+                  <span className="h-4 bg-slate-100 text-slate-400 text-[8px] flex items-center justify-center font-black">✕</span>
+                  <span className="h-4 bg-slate-100 text-slate-400 text-[8px] flex items-center justify-center font-black">✕</span>
                 </div>
               </div>
 
@@ -164,15 +152,15 @@ function Home() {
         </div>
 
         {/* ===================================================================
-            2. STATS BAR: Live Platform Metrics
+            2. STATS BAR: Live Platform Metrics (Monochrome slate/indigo)
             =================================================================== */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm text-center">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm text-center">
           <div>
             <span className="block text-2xl md:text-3xl font-black text-slate-800">450+</span>
             <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mt-1 block">Events Hosted</span>
           </div>
           <div>
-            <span className="block text-2xl md:text-3xl font-black text-indigo-650">12k+</span>
+            <span className="block text-2xl md:text-3xl font-black text-indigo-600">12k+</span>
             <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mt-1 block">Tickets Scanned</span>
           </div>
           <div>
@@ -180,13 +168,13 @@ function Home() {
             <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mt-1 block">Secure Payments</span>
           </div>
           <div>
-            <span className="block text-2xl md:text-3xl font-black text-emerald-600">99.9%</span>
+            <span className="block text-2xl md:text-3xl font-black text-indigo-650 text-indigo-600">99.9%</span>
             <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mt-1 block">Uptime SLA</span>
           </div>
         </div>
 
         {/* ===================================================================
-            3. REAL FEATURED EVENTS: Dynamic grid pulling from MySQL backend
+            3. FEATURED EVENTS: Real Data (Indigo tags, no multi-color badges)
             =================================================================== */}
         <div>
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-10">
@@ -194,7 +182,7 @@ function Home() {
               <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Live Schedule</span>
               <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Featured Event Listings</h2>
             </div>
-            <Link to="/events" className="text-xs font-bold text-indigo-600 hover:text-indigo-750 flex items-center gap-1 mt-2 md:mt-0 transition">
+            <Link to="/events" className="text-xs font-bold text-indigo-600 hover:text-indigo-755 flex items-center gap-1 mt-2 md:mt-0 transition">
               Browse Entire Feed ({featuredEvents.length}) <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -208,10 +196,10 @@ function Home() {
           ) : featuredEvents.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
               {featuredEvents.map(evt => (
-                <div key={evt.id} className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-xl hover:border-indigo-200/50 hover:-translate-y-1.5 transition-all duration-200 flex flex-col justify-between group">
+                <div key={evt.id} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:border-indigo-150 hover:-translate-y-1.5 transition-all duration-200 flex flex-col justify-between group">
                   <div>
                     {/* Event Cover Image */}
-                    <div className="h-40 w-full overflow-hidden bg-slate-100 relative border-b border-slate-100">
+                    <div className="h-40 w-full overflow-hidden bg-slate-105 relative border-b border-slate-100">
                       {evt.imageUrl ? (
                         <img 
                           src={evt.imageUrl} 
@@ -219,7 +207,7 @@ function Home() {
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-4xl">📅</div>
+                        <div className="w-full h-full flex items-center justify-center text-4xl bg-slate-100">📅</div>
                       )}
                       <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-white/90 backdrop-blur-sm text-[9px] font-black text-indigo-700 rounded-md uppercase tracking-wider border border-indigo-100">
                         {evt.category}
@@ -249,11 +237,11 @@ function Home() {
                   <div className="p-5 pt-0 border-t border-slate-50 mt-4 flex items-center justify-between">
                     <div>
                       <span className="text-[8px] text-slate-450 font-bold block uppercase">Tickets from</span>
-                      <span className="text-sm font-black text-slate-700 font-bold">₹{evt.price.toFixed(2)}</span>
+                      <span className="text-sm font-black text-slate-705 text-slate-700">₹{evt.price.toFixed(2)}</span>
                     </div>
                     <Link
                       to={`/events/${evt.id}`}
-                      className="px-3.5 py-2 bg-slate-100 group-hover:bg-indigo-650 text-slate-650 group-hover:text-white text-xs font-black rounded-xl transition duration-155 duration-150 flex items-center gap-1"
+                      className="px-3.5 py-2 bg-slate-100 group-hover:bg-indigo-600 text-slate-650 group-hover:text-white text-xs font-black rounded-xl transition duration-150 flex items-center gap-1"
                     >
                       <span>Book Now</span>
                       <ArrowRight className="w-3 h-3" />
@@ -283,7 +271,7 @@ function Home() {
             
             {/* Step 1 */}
             <div className="flex flex-col gap-4 text-left p-6 bg-white border border-slate-200 rounded-3xl hover:border-indigo-500/20 transition group shadow-sm">
-              <span className="text-3xl font-black text-slate-200 group-hover:text-indigo-500/20 transition duration-200">01</span>
+              <span className="text-3xl font-black text-slate-200 group-hover:text-indigo-600/10 transition duration-200">01</span>
               <h4 className="font-extrabold text-slate-800 text-sm">Discover Events</h4>
               <p className="text-slate-450 text-xs leading-relaxed font-medium">
                 Filter through live conferences, category tags, and layout specifications.
@@ -292,16 +280,16 @@ function Home() {
 
             {/* Step 2 */}
             <div className="flex flex-col gap-4 text-left p-6 bg-white border border-slate-200 rounded-3xl hover:border-indigo-500/20 transition group shadow-sm">
-              <span className="text-3xl font-black text-slate-200 group-hover:text-indigo-500/20 transition duration-200">02</span>
+              <span className="text-3xl font-black text-slate-200 group-hover:text-indigo-600/10 transition duration-200">02</span>
               <h4 className="font-extrabold text-slate-800 text-sm">Choose Seats</h4>
-              <p className="text-slate-450 text-xs leading-relaxed font-medium">
+              <p className="text-slate-455 text-slate-450 text-xs leading-relaxed font-medium">
                 Select coordinate bounds including VIP front rows and walkway aisle blockings.
               </p>
             </div>
 
             {/* Step 3 */}
             <div className="flex flex-col gap-4 text-left p-6 bg-white border border-slate-200 rounded-3xl hover:border-indigo-500/20 transition group shadow-sm">
-              <span className="text-3xl font-black text-slate-200 group-hover:text-indigo-500/20 transition duration-200">03</span>
+              <span className="text-3xl font-black text-slate-200 group-hover:text-indigo-600/10 transition duration-200">03</span>
               <h4 className="font-extrabold text-slate-800 text-sm">Secure Payment</h4>
               <p className="text-slate-450 text-xs leading-relaxed font-medium">
                 Checkout with secure Razorpay test accounts, validated on backend server layers.
@@ -310,8 +298,8 @@ function Home() {
 
             {/* Step 4 */}
             <div className="flex flex-col gap-4 text-left p-6 bg-white border border-slate-200 rounded-3xl hover:border-indigo-500/20 transition group shadow-sm">
-              <span className="text-3xl font-black text-slate-200 group-hover:text-indigo-500/20 transition duration-200">04</span>
-              <h4 className="font-extrabold text-slate-800 text-sm">Download Ticket</h4>
+              <span className="text-3xl font-black text-slate-200 group-hover:text-indigo-600/10 transition duration-200">04</span>
+              <h4 className="font-extrabold text-slate-805 text-slate-800 text-sm">Download Ticket</h4>
               <p className="text-slate-450 text-xs leading-relaxed font-medium">
                 Claim scan-ready entrance passes compiled dynamically via backend ZXing algorithms.
               </p>
@@ -323,12 +311,12 @@ function Home() {
         {/* ===================================================================
             5. GRADIENT CALL-TO-ACTION CARD
             =================================================================== */}
-        <div className="bg-gradient-to-r from-indigo-650 via-purple-600 to-indigo-700 bg-indigo-600 p-8 md:p-12 rounded-3xl text-white text-center shadow-lg relative overflow-hidden group">
-          {/* Glass lines background overlay */}
+        <div className="bg-indigo-600 p-8 md:p-12 rounded-3xl text-white text-center shadow-lg relative overflow-hidden group">
+          {/* Subtle grid background overlay */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none"></div>
 
           <span className="text-[10px] font-black text-indigo-200 uppercase tracking-widest">Join Instantly</span>
-          <h2 className="text-2xl md:text-4xl font-black mt-2 leading-tight font-black">Ready to Book Your Next Experience?</h2>
+          <h2 className="text-2xl md:text-4xl font-black mt-2 leading-tight">Ready to Book Your Next Experience?</h2>
           <p className="text-xs md:text-sm text-indigo-100 max-w-md mx-auto mt-3 leading-relaxed">
             Register a free account, browse featured developer conferences, and claim your tickets.
           </p>
@@ -352,11 +340,11 @@ function Home() {
             <span>Spring Security JWT</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <Users className="w-3.5 h-3.5 text-slate-450" />
+            <Users className="w-3.5 h-3.5 text-slate-455 text-slate-450" />
             <span>Role-Based RBAC</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 text-slate-455 text-slate-450" />
+            <ShieldCheck className="w-3.5 h-3.5 text-slate-450" />
             <span>Razorpay Verify</span>
           </div>
         </div>
