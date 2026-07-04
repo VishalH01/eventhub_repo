@@ -47,8 +47,8 @@ function SeatSelectionModal({
   const totalAmount = selectedSeats.reduce((sum, seat) => sum + calculateSeatPrice(seat), 0);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 md:p-4 transition-all duration-300 outline-none focus:outline-none">
-      <div className="bg-white border border-slate-100 rounded-3xl shadow-2xl max-w-5xl w-[95%] md:w-full flex flex-col md:flex-row overflow-y-auto md:overflow-hidden animate-scale-up max-h-[90vh] md:max-h-[85vh] mx-auto my-auto outline-none focus:outline-none">
+    <div className="fixed inset-0 bg-slate-900/10 backdrop-blur-2xl z-[100] flex items-center justify-center p-3 md:p-4 transition-all duration-300 outline-none focus:outline-none">
+      <div className="bg-white border border-slate-100 rounded-3xl shadow-2xl max-w-6xl w-[98%] md:w-full flex flex-col md:flex-row overflow-y-auto md:overflow-hidden animate-scale-up max-h-[90vh] md:max-h-[85vh] mx-auto my-auto outline-none focus:outline-none">
         
         {/* Left Side: Seat Layout Grid */}
         <div className="flex-1 p-4 md:p-8 flex flex-col justify-between overflow-y-visible md:overflow-y-auto bg-white min-h-0">
@@ -164,8 +164,11 @@ function SeatSelectionModal({
           </div>
         </div>
 
+        {/* Mobile Horizontal Divider */}
+        <hr className="border-t border-slate-200/60 my-2 md:hidden w-[92%] mx-auto" />
+
         {/* Right Side: Booking Summary Panel */}
-        <div className="w-full md:w-80 bg-slate-50/70 p-5 md:p-8 border-t md:border-t-0 md:border-l border-slate-150 flex flex-col justify-between shrink-0">
+        <div className="w-full md:w-80 bg-slate-50/70 p-5 md:p-8 md:border-l border-slate-150 flex flex-col justify-between shrink-0">
           <div>
             <h4 className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4 md:mb-6">Booking Details</h4>
             <div className="space-y-4 md:space-y-5">
