@@ -295,11 +295,14 @@ function MyRegistrations() {
   }
 
   return (
-    <div className="py-8 max-w-4xl mx-auto px-4">
+    <div className="py-8 max-w-6xl mx-auto px-4 space-y-8">
       {/* Header */}
-      <div className="mb-8 text-center md:text-left">
-        <h2 className="text-3xl font-extrabold text-slate-800">My Registrations</h2>
-        <p className="mt-2 text-slate-500">View your ticket history, payment status, and download attendance QR codes.</p>
+      <div className="text-left space-y-2 animate-fade-in">
+        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-50 text-indigo-700 uppercase tracking-widest">
+          Attendee Hub
+        </span>
+        <h2 className="text-3xl font-black text-slate-800 tracking-tight">My Registrations</h2>
+        <p className="text-slate-500 text-sm font-medium">View your ticket history, complete payments, and download entry QR passes.</p>
       </div>
 
 

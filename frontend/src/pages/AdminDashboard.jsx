@@ -192,8 +192,6 @@ function AdminDashboard() {
 
   return (
     <div className="py-8 max-w-6xl mx-auto px-4 relative">
-      {/* Background decorations */}
-      <div className="absolute top-10 right-1/4 w-72 h-72 bg-purple-100/30 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
 
       <div className="relative z-10 space-y-8">
         
@@ -212,7 +210,7 @@ function AdminDashboard() {
           
           {/* Card 1: Revenue */}
           <div className="bg-white p-5 rounded-3xl border border-slate-150 shadow-sm flex items-center gap-4 hover:shadow-md transition-all duration-200 group">
-            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl text-xl font-bold group-hover:bg-emerald-600 group-hover:text-white transition duration-200">
+            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl text-xl font-bold group-hover:bg-indigo-600 group-hover:text-white transition duration-200">
               <TrendingUp className="w-5 h-5" />
             </div>
             <div className="text-left">
@@ -234,7 +232,7 @@ function AdminDashboard() {
 
           {/* Card 3: Users */}
           <div className="bg-white p-5 rounded-3xl border border-slate-150 shadow-sm flex items-center gap-4 hover:shadow-md transition-all duration-200 group">
-            <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl text-xl font-bold group-hover:bg-amber-600 group-hover:text-white transition duration-200">
+            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl text-xl font-bold group-hover:bg-indigo-600 group-hover:text-white transition duration-200">
               <Users className="w-5 h-5" />
             </div>
             <div className="text-left">
@@ -245,7 +243,7 @@ function AdminDashboard() {
 
           {/* Card 4: Events */}
           <div className="bg-white p-5 rounded-3xl border border-slate-150 shadow-sm flex items-center gap-4 hover:shadow-md transition-all duration-200 group">
-            <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl text-xl font-bold group-hover:bg-purple-600 group-hover:text-white transition duration-200">
+            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl text-xl font-bold group-hover:bg-indigo-600 group-hover:text-white transition duration-200">
               <Calendar className="w-5 h-5" />
             </div>
             <div className="text-left">
