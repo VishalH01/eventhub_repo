@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import API from '../services/api';
+import { 
+  Plus, 
+  Edit2, 
+  Trash2, 
+  TrendingUp, 
+  Ticket, 
+  Users, 
+  Calendar,
+  Grid,
+  MapPin,
+  Clock,
+  Sparkles,
+  Settings
+} from 'lucide-react';
 
 function AdminDashboard() {
   // Check if the current user is logged in and is an admin
@@ -168,291 +182,318 @@ function AdminDashboard() {
 
   if (!isAdmin) {
     return (
-      <div className="py-16 text-center max-w-xl mx-auto px-4">
-        <div className="p-6 bg-amber-50 border border-amber-100 text-amber-700 rounded-xl font-medium">
-          ⛔ **Access Denied**: You do not have permissions to access the administrator panel.
+      <div className="py-16 text-center max-w-xl mx-auto px-4 animate-scale-up">
+        <div className="p-6 bg-red-50 border border-red-150 text-red-700 rounded-3xl font-bold text-sm">
+          ⛔ Access Denied: You do not have permissions to access the administrator panel.
         </div>
       </div>
     );
   }
 
   return (
-    <div className="py-8 max-w-6xl mx-auto px-4">
-      {/* Header */}
-      <div className="mb-8 text-center md:text-left">
-        <h2 className="text-3xl font-extrabold text-slate-800">Admin Dashboard</h2>
-        <p className="mt-2 text-slate-500">Create, edit, and delete events, and monitor platform statistics.</p>
-      </div>
+    <div className="py-8 max-w-6xl mx-auto px-4 relative">
+      {/* Background decorations */}
+      <div className="absolute top-10 right-1/4 w-72 h-72 bg-purple-100/30 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
 
-      {/* Analytics Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <div className="relative z-10 space-y-8">
         
-        {/* Card 1: Revenue */}
-        <div className="bg-white p-6 rounded-xl border border-slate-150 shadow-sm flex items-center gap-4 hover:scale-[1.02] transition duration-150">
-          <div className="p-3 bg-emerald-50 rounded-lg text-2xl">💰</div>
-          <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Revenue</p>
-            <h4 className="text-2xl font-black text-slate-800 mt-1">₹{stats.totalRevenue.toFixed(2)}</h4>
-          </div>
+        {/* Header */}
+        <div className="text-left space-y-2 animate-fade-in">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-50 text-indigo-700 uppercase tracking-widest flex items-center gap-1.5 w-fit">
+            <Settings className="w-3 h-3 text-indigo-650 animate-spin" />
+            <span>Admin Console</span>
+          </span>
+          <h2 className="text-3xl font-black text-slate-800 tracking-tight">Management Dashboard</h2>
+          <p className="text-slate-500 text-sm font-medium">Create and edit event dimensions, configure seating grids, and monitor platform metrics.</p>
         </div>
 
-        {/* Card 2: Bookings */}
-        <div className="bg-white p-6 rounded-xl border border-slate-150 shadow-sm flex items-center gap-4 hover:scale-[1.02] transition duration-150">
-          <div className="p-3 bg-blue-50 rounded-lg text-2xl">🎟️</div>
-          <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Bookings</p>
-            <h4 className="text-2xl font-black text-slate-800 mt-1">{stats.totalRegistrations}</h4>
-          </div>
-        </div>
-
-        {/* Card 3: Users */}
-        <div className="bg-white p-6 rounded-xl border border-slate-150 shadow-sm flex items-center gap-4 hover:scale-[1.02] transition duration-150">
-          <div className="p-3 bg-amber-50 rounded-lg text-2xl">👥</div>
-          <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Users</p>
-            <h4 className="text-2xl font-black text-slate-800 mt-1">{stats.totalUsers}</h4>
-          </div>
-        </div>
-
-        {/* Card 4: Events */}
-        <div className="bg-white p-6 rounded-xl border border-slate-150 shadow-sm flex items-center gap-4 hover:scale-[1.02] transition duration-150">
-          <div className="p-3 bg-violet-50 rounded-lg text-2xl">📅</div>
-          <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Events</p>
-            <h4 className="text-2xl font-black text-slate-800 mt-1">{stats.totalEvents}</h4>
-          </div>
-        </div>
-
-      </div>
-
-
-
-      {/* Grid: Events List (Left) and Create/Edit Form (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Events Management Table List (Col span 2) */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-150">
-          <h3 className="text-lg font-bold text-slate-800 mb-6">Manage Event Catalog</h3>
+        {/* Analytics Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           
-          {loading ? (
-            <div className="text-center py-6">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+          {/* Card 1: Revenue */}
+          <div className="bg-white p-5 rounded-3xl border border-slate-150 shadow-sm flex items-center gap-4 hover:shadow-md transition-all duration-200 group">
+            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl text-xl font-bold group-hover:bg-emerald-600 group-hover:text-white transition duration-200">
+              <TrendingUp className="w-5 h-5" />
             </div>
-          ) : events.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-100 text-slate-400 text-xs font-semibold uppercase tracking-wider">
-                    <th className="pb-3">Title</th>
-                    <th className="pb-3">Date</th>
-                    <th className="pb-3">Category</th>
-                    <th className="pb-3">Price</th>
-                    <th className="pb-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm divide-y divide-slate-50 text-slate-600">
-                  {events.map((evt) => (
-                    <tr key={evt.id} className="hover:bg-slate-50/50 transition">
-                      <td className="py-3.5 font-bold text-slate-800">{evt.title}</td>
-                      <td className="py-3.5">
-                        {new Date(evt.date).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'})}
-                      </td>
-                      <td className="py-3.5">
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700">
-                          {evt.category}
-                        </span>
-                      </td>
-                      <td className="py-3.5 font-semibold text-slate-800">₹{evt.price.toFixed(2)}</td>
-                      <td className="py-3.5 text-right space-x-2">
-                        <button
-                          onClick={() => handleEditClick(evt)}
-                          className="px-2.5 py-1 text-xs font-bold text-indigo-600 hover:bg-indigo-50 border border-indigo-100 rounded transition"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteClick(evt.id, evt.title)}
-                          className="px-2.5 py-1 text-xs font-bold text-red-600 hover:bg-red-50 border border-red-100 rounded transition"
-                        >
-                          Delete
-                        </button>
-                      </td>
+            <div className="text-left">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Total Revenue</p>
+              <h4 className="text-xl font-black text-slate-800 mt-0.5">₹{stats.totalRevenue.toFixed(2)}</h4>
+            </div>
+          </div>
+
+          {/* Card 2: Bookings */}
+          <div className="bg-white p-5 rounded-3xl border border-slate-150 shadow-sm flex items-center gap-4 hover:shadow-md transition-all duration-200 group">
+            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl text-xl font-bold group-hover:bg-indigo-600 group-hover:text-white transition duration-200">
+              <Ticket className="w-5 h-5" />
+            </div>
+            <div className="text-left">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Total Bookings</p>
+              <h4 className="text-xl font-black text-slate-800 mt-0.5">{stats.totalRegistrations}</h4>
+            </div>
+          </div>
+
+          {/* Card 3: Users */}
+          <div className="bg-white p-5 rounded-3xl border border-slate-150 shadow-sm flex items-center gap-4 hover:shadow-md transition-all duration-200 group">
+            <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl text-xl font-bold group-hover:bg-amber-600 group-hover:text-white transition duration-200">
+              <Users className="w-5 h-5" />
+            </div>
+            <div className="text-left">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Total Users</p>
+              <h4 className="text-xl font-black text-slate-800 mt-0.5">{stats.totalUsers}</h4>
+            </div>
+          </div>
+
+          {/* Card 4: Events */}
+          <div className="bg-white p-5 rounded-3xl border border-slate-150 shadow-sm flex items-center gap-4 hover:shadow-md transition-all duration-200 group">
+            <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl text-xl font-bold group-hover:bg-purple-600 group-hover:text-white transition duration-200">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div className="text-left">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Total Events</p>
+              <h4 className="text-xl font-black text-slate-800 mt-0.5">{stats.totalEvents}</h4>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Grid: Events List (Left) and Create/Edit Form (Right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          
+          {/* Events Management Table List (Col span 2) */}
+          <div className="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-150 flex flex-col gap-6">
+            <div className="flex justify-between items-center pb-2">
+              <h3 className="text-base font-extrabold text-slate-800 uppercase tracking-wider">Manage Event Catalog</h3>
+            </div>
+            
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+              </div>
+            ) : events.length > 0 ? (
+              <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <table className="w-full text-left border-collapse min-w-[500px]">
+                  <thead>
+                    <tr className="border-b border-slate-100 text-slate-400 text-[10px] font-black uppercase tracking-wider">
+                      <th className="pb-3">Title</th>
+                      <th className="pb-3">Date</th>
+                      <th className="pb-3">Category</th>
+                      <th className="pb-3">Price</th>
+                      <th className="pb-3 text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="text-slate-500 py-6 text-center">No events found. Create one on the right form.</p>
-          )}
-        </div>
+                  </thead>
+                  <tbody className="text-xs font-semibold divide-y divide-slate-50 text-slate-650">
+                    {events.map((evt) => (
+                      <tr key={evt.id} className="hover:bg-slate-50/50 transition duration-150">
+                        <td className="py-4 font-extrabold text-slate-800 max-w-[200px] truncate" title={evt.title}>{evt.title}</td>
+                        <td className="py-4 whitespace-nowrap">
+                          {new Date(evt.date).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'})}
+                        </td>
+                        <td className="py-4">
+                          <span className="px-2 py-0.5 rounded-md text-[9px] font-black bg-indigo-50 text-indigo-700 uppercase tracking-wider">
+                            {evt.category}
+                          </span>
+                        </td>
+                        <td className="py-4 font-black text-slate-850">₹{evt.price.toFixed(2)}</td>
+                        <td className="py-4 text-right space-x-2 whitespace-nowrap">
+                          <button
+                            onClick={() => handleEditClick(evt)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-black text-indigo-650 hover:bg-indigo-50 border border-indigo-100 rounded-lg transition"
+                          >
+                            <Edit2 className="w-3 h-3" /> Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(evt.id, evt.title)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-black text-red-600 hover:bg-red-50 border border-red-100 rounded-lg transition"
+                          >
+                            <Trash2 className="w-3 h-3" /> Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-12 text-slate-400 text-xs font-medium">
+                🎟️ No events found. Create one using the form on the right.
+              </div>
+            )}
+          </div>
 
-        {/* Create / Edit Form Box (Col span 1) */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-150">
-          <h3 className="text-lg font-bold text-slate-800 mb-6">
-            {editMode ? '✏️ Edit Event Details' : '➕ Create New Event'}
-          </h3>
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Event Title</label>
-              <input
-                type="text"
-                required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
-                placeholder="e.g. Creative Design Session"
-              />
-            </div>
+          {/* Create / Edit Form Box (Col span 1) */}
+          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-150 text-left flex flex-col gap-6">
+            <h3 className="text-base font-extrabold text-slate-800 uppercase tracking-wider">
+              {editMode ? '✏️ Edit Event Details' : '➕ Create New Event'}
+            </h3>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Event Title */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Event Title</label>
+                <input
+                  type="text"
+                  required
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white text-xs font-medium"
+                  placeholder="e.g. Spring Boot Developer Conf"
+                />
+              </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Category</label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
-              >
-                <option value="Technology">Technology</option>
-                <option value="Design">Design</option>
-                <option value="Music">Music</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Date & Time</label>
-              <input
-                type="datetime-local"
-                required
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Venue Location</label>
-              <input
-                type="text"
-                required
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
-                placeholder="e.g. Mumbai, India"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Ticket Price (INR)</label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                required
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
-                placeholder="e.g. 499.00"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Image URL</label>
-              <input
-                type="url"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
-                placeholder="https://example.com/image.jpg"
-              />
-            </div>
-
-            {/* Simulated Seating Layout Configuration Panel */}
-            <div className="grid grid-cols-2 gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-100">
-              <div className="col-span-2">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Seating Layout Preset</label>
+              {/* Category Dropdown */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Category</label>
                 <select
-                  value={seatingLayout}
-                  onChange={(e) => setSeatingLayout(e.target.value)}
-                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-xs text-slate-700 font-medium"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white text-xs font-bold text-slate-700"
                 >
-                  <option value="STANDARD">Standard Seating</option>
-                  <option value="VIP_FRONT">VIP Front Rows</option>
-                  <option value="CENTER_AISLE">Center Walkway Aisle</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Design">Design</option>
+                  <option value="Music">Music</option>
                 </select>
               </div>
-              
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Rows (Max 10)</label>
+
+              {/* Date & Time */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Date & Time</label>
                 <input
-                  type="number"
-                  min="1"
-                  max="10"
+                  type="datetime-local"
                   required
-                  value={seatingRows}
-                  onChange={(e) => setSeatingRows(e.target.value)}
-                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-xs font-semibold text-slate-700"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white text-xs font-semibold text-slate-700"
                 />
               </div>
 
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Cols (Max 12)</label>
+              {/* Venue Location */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Venue Location</label>
                 <input
-                  type="number"
-                  min="1"
-                  max="12"
+                  type="text"
                   required
-                  value={seatingCols}
-                  onChange={(e) => setSeatingCols(e.target.value)}
-                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-xs font-semibold text-slate-700"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white text-xs font-medium"
+                  placeholder="e.g. Mumbai Convention Hall"
                 />
               </div>
 
-              <div className="col-span-2">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Seating Capacity (N)</label>
+              {/* Ticket Price */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Ticket Price (INR)</label>
                 <input
                   type="number"
-                  min="1"
+                  min="0"
+                  step="0.01"
                   required
-                  value={totalCapacity}
-                  onChange={(e) => setTotalCapacity(e.target.value)}
-                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-xs font-semibold text-slate-700"
-                  placeholder="e.g. 50"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white text-xs font-semibold text-slate-750"
+                  placeholder="e.g. 499.00"
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Event Description</label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows="4"
-                className="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
-                placeholder="Write full event details here..."
-              ></textarea>
-            </div>
+              {/* Image URL */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Cover Image URL</label>
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white text-xs font-medium"
+                  placeholder="https://images.unsplash.com/photo-..."
+                />
+              </div>
 
-            <div className="pt-2 flex gap-3">
-              <button
-                type="submit"
-                className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-sm text-sm transition"
-              >
-                {editMode ? 'Save Changes' : 'Create Event'}
-              </button>
-              {editMode && (
+              {/* Seating Layout Configuration Panel */}
+              <div className="grid grid-cols-2 gap-3.5 p-3.5 bg-slate-50 border border-slate-150 rounded-2xl">
+                <div className="col-span-2 space-y-1">
+                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Seating Layout Preset</label>
+                  <select
+                    value={seatingLayout}
+                    onChange={(e) => setSeatingLayout(e.target.value)}
+                    className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 bg-white text-[11px] text-slate-700 font-bold"
+                  >
+                    <option value="STANDARD">Standard Seating</option>
+                    <option value="VIP_FRONT">VIP Front Rows</option>
+                    <option value="CENTER_AISLE">Center Walkway Aisle</option>
+                  </select>
+                </div>
+                
+                <div className="space-y-1">
+                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Rows (Max 10)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="10"
+                    required
+                    value={seatingRows}
+                    onChange={(e) => setSeatingRows(e.target.value)}
+                    className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 bg-white text-xs font-semibold text-slate-700"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Cols (Max 12)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="12"
+                    required
+                    value={seatingCols}
+                    onChange={(e) => setSeatingCols(e.target.value)}
+                    className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 bg-white text-xs font-semibold text-slate-700"
+                  />
+                </div>
+
+                <div className="col-span-2 space-y-1">
+                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Seating Capacity (N)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={totalCapacity}
+                    onChange={(e) => setTotalCapacity(e.target.value)}
+                    className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 bg-white text-xs font-semibold text-slate-700"
+                    placeholder="e.g. 50"
+                  />
+                </div>
+              </div>
+
+              {/* Event Description */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Event Description</label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows="4"
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white text-xs font-medium"
+                  placeholder="Write full event details here..."
+                ></textarea>
+              </div>
+
+              <div className="pt-2 flex gap-3">
                 <button
-                  type="button"
-                  onClick={resetForm}
-                  className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold rounded-lg text-sm transition"
+                  type="submit"
+                  className="flex-1 py-2.5 bg-indigo-650 hover:bg-indigo-700 bg-indigo-600 text-white font-bold rounded-xl shadow-md transition text-xs uppercase tracking-wider"
                 >
-                  Cancel
+                  {editMode ? 'Save Changes' : 'Create Event'}
                 </button>
-              )}
-            </div>
-          </form>
-        </div>
+                {editMode && (
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-4 py-2.5 border border-slate-250 hover:bg-slate-100 bg-white text-slate-500 font-semibold rounded-xl text-xs transition"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
 
+        </div>
       </div>
     </div>
   );
