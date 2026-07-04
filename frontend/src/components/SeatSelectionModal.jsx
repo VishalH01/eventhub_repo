@@ -47,8 +47,8 @@ function SeatSelectionModal({
   const totalAmount = selectedSeats.reduce((sum, seat) => sum + calculateSeatPrice(seat), 0);
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 transition-all duration-300">
-      <div className="bg-white border border-slate-100 rounded-3xl shadow-2xl max-w-4xl w-full flex flex-col md:flex-row overflow-y-auto md:overflow-hidden animate-scale-up max-h-[95vh] md:max-h-[90vh]">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 md:p-4 transition-all duration-300 outline-none focus:outline-none">
+      <div className="bg-white border border-slate-100 rounded-3xl shadow-2xl max-w-5xl w-[95%] md:w-full flex flex-col md:flex-row overflow-y-auto md:overflow-hidden animate-scale-up max-h-[90vh] md:max-h-[85vh] mx-auto my-auto outline-none focus:outline-none">
         
         {/* Left Side: Seat Layout Grid */}
         <div className="flex-1 p-5 md:p-8 flex flex-col justify-between overflow-y-auto bg-white min-h-[450px] md:min-h-0">
@@ -75,7 +75,7 @@ function SeatSelectionModal({
             </div>
 
             {/* Grid Container */}
-            <div className="flex flex-col gap-2 md:gap-3.5 items-center justify-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden py-3 md:py-4 bg-slate-55 bg-slate-50/50 p-3 md:p-6 rounded-2xl border border-slate-150 max-w-full">
+            <div className="flex flex-col gap-2 md:gap-3 items-center justify-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden py-3 md:py-4 bg-slate-50/50 p-4 md:p-6 rounded-2xl border border-slate-150 max-w-full w-full">
               {rows.map((rowLabel, rIndex) => {
                 return (
                   <div key={rowLabel} className="flex gap-2 md:gap-3 items-center min-w-max">
@@ -112,9 +112,7 @@ function SeatSelectionModal({
                           <React.Fragment key={seatCode}>
                             {/* Render visual aisle space */}
                             {aisleIndex > 0 && cIndex === aisleIndex && (
-                              <div className="w-6 h-7 md:w-8 md:h-8 flex items-center justify-center select-none mx-0.5 md:mx-1.5">
-                                <span className="text-[7px] md:text-[8px] font-black text-slate-400 tracking-[0.2em] md:tracking-[0.25em] uppercase rotate-90">AISLE</span>
-                              </div>
+                              <div className="w-6 md:w-8 h-7 md:h-8 flex items-center justify-center select-none" aria-hidden="true" />
                             )}
 
                             <button

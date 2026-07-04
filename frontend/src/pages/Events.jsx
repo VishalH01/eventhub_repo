@@ -1,163 +1,188 @@
 import React, { useState, useEffect } from 'react';
-// Link allows navigation to the Event Details page on card click.
 import { Link } from 'react-router-dom';
-// Import our Axios API client
 import API from '../services/api';
+import { 
+  Search, 
+  Calendar, 
+  MapPin, 
+  ArrowRight,
+  Sparkles
+} from 'lucide-react';
 
 function Events() {
-  // State to hold the list of events fetched from our database.
   const [events, setEvents] = useState([]);
-  // State to hold the current user-entered search string.
   const [searchTerm, setSearchTerm] = useState('');
-  // State to hold the currently selected dropdown category filter.
   const [selectedCategory, setSelectedCategory] = useState('All');
-  // State to show a loading indicator during API calls.
   const [loading, setLoading] = useState(false);
-  // State to capture and display errors from the backend.
   const [error, setError] = useState('');
 
-  // useEffect Hook: Runs code automatically after the component mounts,
-  // and re-runs whenever any value in the dependency array ([searchTerm, selectedCategory]) changes.
+  const categories = ['All', 'Tech', 'Music', 'Design'];
+
   useEffect(() => {
-    // Declare a function to fetch filtered events from our Spring Boot API
     const fetchEvents = async () => {
       setLoading(true);
       setError('');
       try {
-        // Send a GET request to `/api/events` with search and category parameters.
-        // Axios automatically builds the query string: e.g. /api/events?search=summit&category=Technology
         const response = await API.get('/events', {
           params: {
             search: searchTerm,
             category: selectedCategory
           }
         });
-        
-        // Update the events state with the list returned by the controller
         setEvents(response.data);
       } catch (err) {
-        setError('Failed to fetch events from server. Make sure the backend is running.');
+        setError('Failed to load events. Make sure the backend server is running.');
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
-    // Debounce search input to avoid hitting the database on every single keypress
-    // (waits 300ms after the user stops typing before making the API request).
     const delayDebounceFn = setTimeout(() => {
       fetchEvents();
     }, 300);
 
-    // Cleanup function: automatically runs to clear the timer when the user types again, resetting the delay.
     return () => clearTimeout(delayDebounceFn);
-
   }, [searchTerm, selectedCategory]);
 
   return (
-    <div className="py-8 max-w-6xl mx-auto px-4">
-      {/* Header */}
-      <div className="text-center md:text-left mb-8">
-        <h2 className="text-3xl font-extrabold text-slate-800">Browse Events</h2>
-        <p className="mt-2 text-slate-500">Discover and register for amazing sessions happening near you.</p>
-      </div>
+    <div className="relative min-h-[85vh] py-8 max-w-6xl mx-auto px-4 animate-fade-in-up">
+      {/* Background ambient decorations */}
+      <div className="absolute top-10 left-1/4 w-72 h-72 bg-indigo-100/30 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
 
-      {/* Search & Filter Bar */}
-      <div className="flex flex-col md:flex-row gap-4 mb-8 bg-slate-50 p-4 rounded-xl border border-slate-100">
-        <div className="flex-1">
-          <input
-            type="text"
-            placeholder="Search by event title or keywords..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-          />
+      <div className="relative z-10 space-y-8">
+        {/* Page Header */}
+        <div className="text-left space-y-2 animate-fade-in">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-50 text-indigo-700 uppercase tracking-widest">
+            Events Feed
+          </span>
+          <h2 className="text-3xl font-black text-slate-800 tracking-tight">Explore Live Catalog</h2>
+          <p className="text-slate-500 text-sm font-medium">Discover technical conferences, workshop classes, and local concerts happening near you.</p>
         </div>
-        <div className="w-full md:w-48">
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-          >
-            <option value="All">All Categories</option>
-            <option value="Technology">Technology</option>
-            <option value="Design">Design</option>
-            <option value="Music">Music</option>
-          </select>
-        </div>
-      </div>
 
-      {/* Error Alert */}
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-lg text-sm font-medium">
-          ⚠️ {error}
+        {/* Search & Interactive Category Chips Panel */}
+        <div className="flex flex-col gap-5 p-5 bg-white border border-slate-150 shadow-sm rounded-3xl">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            {/* Search Input Box */}
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search events by title, description or keywords..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 text-xs md:text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white transition duration-150 font-medium"
+              />
+            </div>
+            
+            {/* Category Pill Selection */}
+            <div className="flex flex-wrap gap-2 w-full md:w-auto justify-start">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-4.5 py-2 text-xs font-bold rounded-xl border transition-all duration-150 ${
+                    selectedCategory === cat
+                      ? 'bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-500/10'
+                      : 'bg-white border-slate-200 text-slate-650 hover:bg-slate-50'
+                  }`}
+                >
+                  {cat === 'All' ? 'All Categories' : cat}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-      )}
 
-      {/* Loading Spinner */}
-      {loading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-        </div>
-      ) : events.length > 0 ? (
-        /* Events Grid */
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {events.map(event => (
-            <div key={event.id} className="bg-white rounded-xl shadow-sm border border-slate-150 overflow-hidden flex flex-col hover:shadow-md transition duration-150">
-              {/* Event Image */}
-              {event.imageUrl ? (
-                <img
-                  src={event.imageUrl}
-                  alt={event.title}
-                  className="w-full h-48 object-cover"
-                />
-              ) : (
-                <div className="w-full h-48 bg-slate-100 flex items-center justify-center text-4xl">📅</div>
-              )}
-              
-              {/* Event Details */}
-              <div className="p-6 flex-1 flex flex-col justify-between">
+        {/* Error Alert */}
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-150 text-red-650 rounded-2xl text-xs font-semibold flex items-center gap-2">
+            ⚠️ {error}
+          </div>
+        )}
+
+        {/* Loading Spinner */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-80 bg-slate-100 rounded-3xl animate-pulse"></div>
+            ))}
+          </div>
+        ) : events.length > 0 ? (
+          /* Events Grid */
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-2">
+            {events.map((event) => (
+              <div key={event.id} className="bg-white rounded-3xl border border-slate-150 overflow-hidden shadow-sm hover:shadow-xl hover:border-indigo-100 hover:-translate-y-1.5 transition-all duration-200 flex flex-col justify-between group">
+                
                 <div>
-                  <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700">
-                    {event.category}
-                  </span>
-                  <h3 className="mt-3 text-lg font-bold text-slate-800 leading-snug">
-                    {event.title}
-                  </h3>
-                  <p className="mt-2 text-slate-500 text-sm line-clamp-3">
-                    {event.description}
-                  </p>
+                  {/* Event Image */}
+                  <div className="w-full h-48 overflow-hidden bg-slate-50 relative border-b border-slate-100">
+                    {event.imageUrl ? (
+                      <img
+                        src={event.imageUrl}
+                        alt={event.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-4xl">📅</div>
+                    )}
+                    <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-white/90 backdrop-blur-sm text-[9px] font-black text-indigo-700 rounded-md uppercase tracking-wider">
+                      {event.category}
+                    </span>
+                  </div>
+                  
+                  {/* Event Details */}
+                  <div className="p-6">
+                    <h3 className="text-base font-extrabold text-slate-800 leading-snug group-hover:text-indigo-650 transition line-clamp-1">
+                      {event.title}
+                    </h3>
+                    <p className="mt-2 text-slate-450 text-xs md:text-sm leading-relaxed line-clamp-2">
+                      {event.description}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="mt-6 border-t border-slate-100 pt-4">
-                  <div className="flex justify-between items-center text-sm text-slate-500">
-                    {/* Format standard ISO datetime into a friendly display */}
-                    <span>📅 {new Date(event.date).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'})}</span>
-                    <span>📍 {event.location}</span>
+                <div className="p-6 pt-0 mt-2">
+                  <div className="flex justify-between items-center text-[10px] md:text-xs text-slate-500 border-t border-slate-50 pt-4">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5 text-indigo-500" />
+                      {new Date(event.date).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'})}
+                    </span>
+                    <span className="flex items-center gap-1 max-w-[140px] truncate">
+                      <MapPin className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                      {event.location}
+                    </span>
                   </div>
                   
                   <div className="mt-4 flex justify-between items-center">
-                    <span className="text-xl font-extrabold text-slate-800">
-                      ₹{event.price.toFixed(2)}
-                    </span>
-                    {/* Link to Event Details Page */}
+                    <div>
+                      <span className="text-[8px] text-slate-400 font-bold block uppercase">Ticket Price</span>
+                      <span className="text-base font-black text-slate-700">
+                        ₹{event.price.toFixed(2)}
+                      </span>
+                    </div>
+                    
                     <Link
                       to={`/events/${event.id}`}
-                      className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition"
+                      className="px-4 py-2 bg-slate-100 group-hover:bg-indigo-600 text-slate-650 group-hover:text-white text-xs font-black rounded-xl transition duration-150 flex items-center gap-1"
                     >
-                      View Details
+                      <span>Book Now</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>
                 </div>
+
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <p className="text-slate-500 text-lg">No events found matching your criteria.</p>
-        </div>
-      )}
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20 bg-white rounded-3xl border border-slate-150 shadow-sm max-w-lg mx-auto">
+            <span className="text-5xl">🔍</span>
+            <h3 className="mt-4 text-sm font-extrabold text-slate-800 uppercase tracking-wider">No Events Found</h3>
+            <p className="mt-2 text-slate-500 text-xs font-medium">Try broadening your search term or select another category filter.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

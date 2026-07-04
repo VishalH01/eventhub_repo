@@ -97,7 +97,7 @@ function EventDetails() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-4 px-4">
+    <div className="max-w-6xl mx-auto py-4 px-4 animate-fade-in-up">
       {/* Back Link */}
       <Link to="/events" className="text-slate-500 hover:text-indigo-600 text-xs font-semibold transition flex items-center gap-1.5 mb-4">
         ← Back to Events Feed

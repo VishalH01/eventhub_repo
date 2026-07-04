@@ -41,6 +41,10 @@ public class EventServiceImpl implements EventService {
         existingEvent.setPrice(event.getPrice());
         existingEvent.setCategory(event.getCategory());
         existingEvent.setImageUrl(event.getImageUrl());
+        existingEvent.setSeatingLayout(event.getSeatingLayout());
+        existingEvent.setSeatingRows(event.getSeatingRows());
+        existingEvent.setSeatingCols(event.getSeatingCols());
+        existingEvent.setTotalCapacity(event.getTotalCapacity());
 
         // Step C: Save the updated event entity back to the database
         return eventRepository.save(existingEvent);

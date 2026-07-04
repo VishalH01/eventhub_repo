@@ -7,8 +7,10 @@ function Layout({ children }) {
     // min-h-screen ensures the layout occupies at least 100% of the viewport height.
     // flex and flex-col allow the footer to stay pinned to the bottom of the page if the page content is short.
     <div className="min-h-screen flex flex-col bg-slate-50">
-      {/* Include our global Navbar */}
-      <Navbar />
+      {/* Include our global Navbar (Sticky Floating Wrapper) */}
+      <div className="w-full pt-4 sticky top-0 z-50 px-4">
+        <Navbar />
+      </div>
 
       {/* Main Content Area */}
       {/* flex-grow tells this main container to take up all remaining available vertical space */}
