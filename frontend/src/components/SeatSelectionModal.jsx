@@ -51,7 +51,7 @@ function SeatSelectionModal({
       <div className="bg-white border border-slate-100 rounded-3xl shadow-2xl max-w-5xl w-[95%] md:w-full flex flex-col md:flex-row overflow-y-auto md:overflow-hidden animate-scale-up max-h-[90vh] md:max-h-[85vh] mx-auto my-auto outline-none focus:outline-none">
         
         {/* Left Side: Seat Layout Grid */}
-        <div className="flex-1 p-5 md:p-8 flex flex-col justify-between overflow-y-auto bg-white min-h-[450px] md:min-h-0">
+        <div className="flex-1 p-4 md:p-8 flex flex-col justify-between overflow-y-visible md:overflow-y-auto bg-white min-h-0">
           <div>
             <div className="flex justify-between items-center mb-6 md:mb-8 border-b border-slate-100 pb-4">
               <div>
