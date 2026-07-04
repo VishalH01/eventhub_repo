@@ -75,7 +75,7 @@ function SeatSelectionModal({
             </div>
 
             {/* Grid Container */}
-            <div className="flex flex-col gap-2 md:gap-3 items-center justify-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden py-3 md:py-4 bg-slate-50/50 p-4 md:p-6 rounded-2xl border border-slate-150 max-w-full w-full">
+            <div className="flex flex-col gap-2 md:gap-3 items-center justify-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden py-3 md:py-4 bg-slate-50/50 p-2 md:p-6 rounded-2xl border border-slate-150 max-w-full w-full">
               {rows.map((rowLabel, rIndex) => {
                 return (
                   <div key={rowLabel} className="flex gap-2 md:gap-3 items-center min-w-max">
@@ -94,7 +94,7 @@ function SeatSelectionModal({
                         const isSelected = selectedSeats.includes(seatCode);
 
                         // Styling states for premium look
-                        let seatClass = "w-7 h-7 md:w-8 md:h-8 rounded-lg border text-[9px] md:text-[10px] font-extrabold transition-all duration-150 flex items-center justify-center hover:scale-110 active:scale-95 shadow-sm ";
+                        let seatClass = "w-8 h-8 md:w-9 md:h-9 rounded-lg border text-[10px] md:text-[11px] font-extrabold transition-all duration-150 flex items-center justify-center hover:scale-110 active:scale-95 shadow-sm ";
                         
                         if (isBlocked) {
                           seatClass += "bg-slate-100/50 border-slate-100 text-slate-300 cursor-not-allowed select-none shadow-none hover:scale-100";
@@ -112,7 +112,7 @@ function SeatSelectionModal({
                           <React.Fragment key={seatCode}>
                             {/* Render visual aisle space */}
                             {aisleIndex > 0 && cIndex === aisleIndex && (
-                              <div className="w-6 md:w-8 h-7 md:h-8 flex items-center justify-center select-none" aria-hidden="true" />
+                              <div className="w-6 md:w-8 h-8 md:h-9 flex items-center justify-center select-none" aria-hidden="true" />
                             )}
 
                             <button
