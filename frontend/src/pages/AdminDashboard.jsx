@@ -40,7 +40,7 @@ function AdminDashboard() {
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
   const [price, setPrice] = useState('');
-  const [category, setCategory] = useState('Technology');
+  const [category, setCategory] = useState('Tech');
   const [imageUrl, setImageUrl] = useState('');
 
   // Seating configuration states
@@ -172,7 +172,7 @@ function AdminDashboard() {
     setDate('');
     setLocation('');
     setPrice('');
-    setCategory('Technology');
+    setCategory('Tech');
     setImageUrl('');
     setSeatingLayout('STANDARD');
     setSeatingRows('6');
@@ -346,7 +346,7 @@ function AdminDashboard() {
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white text-xs font-bold text-slate-700"
                 >
-                  <option value="Technology">Technology</option>
+                  <option value="Tech">Tech</option>
                   <option value="Design">Design</option>
                   <option value="Music">Music</option>
                 </select>
