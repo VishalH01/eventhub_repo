@@ -75,7 +75,7 @@ function SeatSelectionModal({
             </div>
 
             {/* Grid Container */}
-            <div className="flex flex-col gap-2 md:gap-3 items-center justify-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden py-3 md:py-4 bg-slate-50/50 p-2 md:p-6 rounded-2xl border border-slate-150 max-w-full w-full">
+            <div className="flex flex-col gap-2 md:gap-3 items-start md:items-center justify-start md:justify-center overflow-x-auto py-3 md:py-4 bg-slate-50/50 p-3 md:p-6 rounded-2xl border border-slate-150 max-w-full w-full">
               {rows.map((rowLabel, rIndex) => {
                 return (
                   <div key={rowLabel} className="flex gap-2 md:gap-3 items-center min-w-max">
