@@ -75,7 +75,7 @@ function Register() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 text-xs md:text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white transition duration-150 font-medium"
-                placeholder="Vishal Haramkar"
+                placeholder="Jane Doe"
                 disabled={loading}
               />
             </div>
