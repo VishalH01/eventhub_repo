@@ -35,8 +35,16 @@ function SeatSelectionModal({
   // Check if center aisle index
   const aisleIndex = layout === 'CENTER_AISLE' ? Math.floor(colsCount / 2) : -1;
 
-  // Calculate pricing
-  const totalAmount = selectedSeats.length * ticketPrice;
+  // Calculate dynamic seat pricing: 1.5x multiplier for VIP seats
+  const calculateSeatPrice = (seatCode) => {
+    const isVIP = layout === 'VIP_FRONT' && (seatCode.charCodeAt(0) - 65) < 2;
+    return isVIP ? ticketPrice * 1.5 : ticketPrice;
+  };
+
+  const vipSeatsSelected = selectedSeats.filter(seat => layout === 'VIP_FRONT' && (seat.charCodeAt(0) - 65) < 2);
+  const standardSeatsSelected = selectedSeats.filter(seat => !(layout === 'VIP_FRONT' && (seat.charCodeAt(0) - 65) < 2));
+  
+  const totalAmount = selectedSeats.reduce((sum, seat) => sum + calculateSeatPrice(seat), 0);
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4 transition-all duration-300">
@@ -192,9 +200,21 @@ function SeatSelectionModal({
               {/* Price Details */}
               <div className="space-y-2 md:space-y-3 px-1 text-xs md:text-sm font-medium text-slate-500">
                 <div className="flex justify-between text-[11px] md:text-xs">
-                  <span>Price per ticket</span>
+                  <span>Base Ticket Price</span>
                   <span className="font-semibold text-slate-700">₹{ticketPrice.toFixed(2)}</span>
                 </div>
+                {vipSeatsSelected.length > 0 && (
+                  <div className="flex justify-between text-[11px] md:text-xs text-amber-600 font-bold">
+                    <span>{vipSeatsSelected.length} × VIP Seat(s) (1.5x)</span>
+                    <span>₹{(vipSeatsSelected.length * ticketPrice * 1.5).toFixed(2)}</span>
+                  </div>
+                )}
+                {standardSeatsSelected.length > 0 && (
+                  <div className="flex justify-between text-[11px] md:text-xs text-slate-500">
+                    <span>{standardSeatsSelected.length} × Standard Seat(s)</span>
+                    <span>₹{(standardSeatsSelected.length * ticketPrice).toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between border-t border-slate-200/80 pt-2.5 md:pt-3 text-slate-800 font-extrabold">
                   <span>Total Invoice</span>
                   <span className="text-indigo-600 font-black text-lg md:text-xl">

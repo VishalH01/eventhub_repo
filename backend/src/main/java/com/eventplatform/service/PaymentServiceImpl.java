@@ -40,12 +40,8 @@ public class PaymentServiceImpl implements PaymentService {
         Registration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new RuntimeException("Registration booking not found with ID: " + registrationId));
 
-        // Calculate price based on the count of selected seats
-        int seatCount = 1;
-        if (registration.getSeats() != null && !registration.getSeats().trim().isEmpty()) {
-            seatCount = registration.getSeats().split(",").length;
-        }
-        double totalPrice = registration.getEvent().getPrice() * seatCount;
+        // Calculate dynamic price based on the count of selected seats and VIP status
+        double totalPrice = calculateRegistrationPrice(registration);
         // Convert to Paise (Razorpay processes amounts in the smallest currency unit: e.g. 1 Rupee = 100 Paise)
         int amountInPaise = (int) (totalPrice * 100);
 
@@ -126,11 +122,7 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setRazorpayOrderId(verifyRequest.getRazorpayOrderId());
         payment.setRazorpayPaymentId(verifyRequest.getRazorpayPaymentId());
         payment.setRazorpaySignature(verifyRequest.getRazorpaySignature());
-        int seatCount = 1;
-        if (registration.getSeats() != null && !registration.getSeats().trim().isEmpty()) {
-            seatCount = registration.getSeats().split(",").length;
-        }
-        double totalPaidAmount = registration.getEvent().getPrice() * seatCount;
+        double totalPaidAmount = calculateRegistrationPrice(registration);
         payment.setAmount(totalPaidAmount);
         payment.setStatus("SUCCESS");
         payment.setPaymentDate(LocalDateTime.now());
@@ -148,5 +140,28 @@ public class PaymentServiceImpl implements PaymentService {
         registration.setQrCodeBase64(base64Image);
 
         return registration;
+    }
+
+    private double calculateRegistrationPrice(Registration registration) {
+        if (registration.getSeats() == null || registration.getSeats().trim().isEmpty()) {
+            return registration.getEvent().getPrice();
+        }
+
+        String[] seats = registration.getSeats().split(",");
+        double basePrice = registration.getEvent().getPrice();
+        String layout = registration.getEvent().getSeatingLayout();
+
+        double total = 0.0;
+        for (String seat : seats) {
+            seat = seat.trim();
+            // Check if VIP seat: Event layout is VIP_FRONT and the seat row index is A or B (A=0, B=1)
+            boolean isVIP = "VIP_FRONT".equalsIgnoreCase(layout) && seat.length() > 0 && (seat.charAt(0) - 'A') < 2;
+            if (isVIP) {
+                total += basePrice * 1.5;
+            } else {
+                total += basePrice;
+            }
+        }
+        return total;
     }
 }
