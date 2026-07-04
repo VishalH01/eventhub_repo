@@ -112,9 +112,7 @@ function SeatSelectionModal({
                           <React.Fragment key={seatCode}>
                             {/* Render visual aisle space */}
                             {aisleIndex > 0 && cIndex === aisleIndex && (
-                              <div className="w-6 h-7 md:w-8 md:h-8 flex items-center justify-center select-none mx-0.5 md:mx-1.5">
-                                <span className="text-[7px] md:text-[8px] font-black text-slate-400 tracking-[0.2em] md:tracking-[0.25em] uppercase rotate-90">AISLE</span>
-                              </div>
+                              <div className="w-6 md:w-8 h-7 md:h-8 flex items-center justify-center select-none" aria-hidden="true" />
                             )}
 
                             <button
