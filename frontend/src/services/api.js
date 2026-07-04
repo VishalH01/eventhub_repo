@@ -7,7 +7,7 @@ const API = axios.create({
   // The base URL for all HTTP requests we make using this instance.
   // Our Spring Boot backend runs on localhost:8080 by default.
   // We suffix it with '/api' so all requests map to our backend API endpoints.
-  baseURL: 'http://localhost:8080/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
   // Sets the default headers for JSON payload requests.
   headers: {
     'Content-Type': 'application/json',
