@@ -47,8 +47,8 @@ function SeatSelectionModal({
   const totalAmount = selectedSeats.reduce((sum, seat) => sum + calculateSeatPrice(seat), 0);
 
   return (
-    <div className="fixed inset-0 bg-transparent md:bg-slate-900/10 backdrop-blur-none md:backdrop-blur-2xl z-[100] flex items-start md:items-center justify-center p-3 md:p-4 transition-all duration-300 outline-none focus:outline-none overflow-y-auto">
-      <div className="bg-white border border-slate-100 rounded-3xl shadow-2xl max-w-6xl w-[98%] md:w-full flex flex-col md:flex-row overflow-visible md:overflow-hidden animate-scale-up max-h-none md:max-h-[85vh] mx-auto my-4 md:my-auto outline-none focus:outline-none">
+    <div className="fixed inset-0 bg-transparent md:bg-slate-900/30 z-[100] flex items-center justify-center p-3 md:p-4 transition-all duration-300 outline-none focus:outline-none">
+      <div className="bg-white border border-slate-100 rounded-3xl shadow-2xl max-w-6xl w-[98%] md:w-full flex flex-col md:flex-row overflow-y-auto md:overflow-hidden animate-scale-up max-h-[95vh] md:max-h-[85vh] mx-auto my-auto outline-none focus:outline-none">
         
         {/* Left Side: Seat Layout Grid */}
         <div className="flex-1 p-4 md:p-8 flex flex-col justify-between overflow-y-visible md:overflow-y-auto bg-white min-h-0">
