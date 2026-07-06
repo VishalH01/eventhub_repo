@@ -170,3 +170,36 @@ To avoid generating physical QR image files on the server (which uses storage sp
     ```
 4.  React simply renders this string in an `<img>` tag:
     `src={`data:image/png;base64,${qrCodeBase64}`}`
+
+---
+
+## 🔄 6. Spring Boot Request Lifecycle Flow
+
+Here is the step-by-step lifecycle of how the Spring Boot backend processes any incoming request (e.g. `POST /api/registrations` to book seats):
+
+```mermaid
+graph TD
+    Client[React Client] -->|1. HTTP Request + JWT| Tomcat[Embedded Tomcat Web Server]
+    Tomcat -->|2. Filter Pipeline| Security[Spring Security Filters]
+    Security -->|CORS, CSRF, JWT validation| Dispatcher[DispatcherServlet Router]
+    Dispatcher -->|3. Route Handler| Controller[REST Controller]
+    Controller -->|4. Bind Request Body DTO| Service[Service Implementation Layer]
+    Service -->|5. Business Logic & Recalculations| Repository[JPA Repository]
+    Repository -->|6. SQL Operations| MySQL[(MySQL Database)]
+    MySQL -->|7. Return Rows| Repository
+    Repository -->|8. Map Entities| Service
+    Service -->|9. Pass back processed DTO| Controller
+    Controller -->|10. Wrap in ResponseEntity & JSON serialize| Tomcat
+    Tomcat -->|11. Send HTTP Response| Client
+```
+
+### Flow Details:
+1. **Tomcat Web Server**: Listens on port 8080. Parses raw incoming HTTP byte streams into Java `HttpServletRequest` objects.
+2. **Spring Security Filter Chain**:
+   * **CORS Filter**: Validates that requests come from the trusted React dev client origin (`http://localhost:5173`).
+   * **JWT Filter**: Extracts `Authorization` headers, validates token signatures using the system secret, and loads roles/permissions.
+3. **DispatcherServlet Router**: Acting as a front controller, it determines which `@RestController` maps to the request URL and calls it.
+4. **Controller Layer**: Parses the incoming JSON body into an input DTO using Jackson. Invokes security authority validations.
+5. **Service Layer**: Handles core business logic (e.g. seat validation, pricing recalculation, Razorpay integration).
+6. **Repository Layer (JPA/Hibernate)**: Translates transactional operations into SQL queries and executes them against MySQL via JDBC.
+7. **Response Serialization**: The controller receives the service result, wraps it in a `ResponseEntity`, Jackson converts the Java object back to a JSON string, and Tomcat writes it to the output socket.
