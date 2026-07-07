@@ -103,9 +103,13 @@ public class SecurityConfig {
         // Allow requests originating from our local React Vite server and any production domain configured in environment variables
         String allowedOriginsEnv = System.getenv("ALLOWED_ORIGINS");
         if (allowedOriginsEnv != null && !allowedOriginsEnv.trim().isEmpty()) {
-            configuration.setAllowedOrigins(Arrays.asList(allowedOriginsEnv.split(",")));
+            configuration.setAllowedOriginPatterns(Arrays.asList(allowedOriginsEnv.split(",")));
         } else {
-            configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+            configuration.setAllowedOriginPatterns(Arrays.asList(
+                "http://localhost:5173",
+                "http://localhost:3000",
+                "https://*.vercel.app"
+            ));
         }
         // Allow all standard HTTP methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
