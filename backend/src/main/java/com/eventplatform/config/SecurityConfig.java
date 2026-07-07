@@ -63,6 +63,9 @@ public class SecurityConfig {
             
             // Configure route-level URL access control rules:
             .authorizeHttpRequests(auth -> auth
+                // Allow all OPTIONS requests (preflight checks)
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                
                 // Allow public access to all auth API endpoints (Register and Login must be public!)
                 .requestMatchers("/api/auth/**").permitAll()
                 
