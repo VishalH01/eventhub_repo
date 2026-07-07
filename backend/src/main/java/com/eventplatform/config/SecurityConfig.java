@@ -19,6 +19,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 
 // @Configuration: Tells Spring Boot that this class contains configuration settings and Bean declarations.
 // @EnableWebSecurity: Integrates Spring Security's web security support.
@@ -100,17 +102,25 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Allow requests originating from our local React Vite server and any production domain configured in environment variables
+        List<String> allowedPatterns = new ArrayList<>();
+        // Always allow local development
+        allowedPatterns.add("http://localhost:5173");
+        allowedPatterns.add("http://localhost:3000");
+        // Always allow Vercel production and preview subdomains
+        allowedPatterns.add("https://*.vercel.app");
+        allowedPatterns.add("https://eventhub-repo.vercel.app");
+
+        // Parse and append custom production domains from environment variables if defined
         String allowedOriginsEnv = System.getenv("ALLOWED_ORIGINS");
         if (allowedOriginsEnv != null && !allowedOriginsEnv.trim().isEmpty()) {
-            configuration.setAllowedOriginPatterns(Arrays.asList(allowedOriginsEnv.split(",")));
-        } else {
-            configuration.setAllowedOriginPatterns(Arrays.asList(
-                "http://localhost:5173",
-                "http://localhost:3000",
-                "https://*.vercel.app"
-            ));
+            for (String origin : allowedOriginsEnv.split(",")) {
+                String trimmed = origin.trim();
+                if (!trimmed.isEmpty()) {
+                    allowedPatterns.add(trimmed);
+                }
+            }
         }
+        configuration.setAllowedOriginPatterns(allowedPatterns);
         // Allow all standard HTTP methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         // Allow all request headers (Authorization, Content-Type, etc.)
