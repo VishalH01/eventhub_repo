@@ -7,8 +7,10 @@ import org.springframework.boot.SpringApplication;
 // 2. @EnableAutoConfiguration: Tells Spring Boot to start adding beans based on classpath settings, other beans, and various property settings.
 // 3. @ComponentScan: Tells Spring to look for other components, configurations, and services in the com.eventplatform package, allowing it to find and register controllers, repositories, etc.
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
+@EnableAsync
 public class EventPlatformApplication {
 
     // The main method serves as the entry point for the Java Virtual Machine (JVM) to execute our application.

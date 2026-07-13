@@ -9,6 +9,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -23,6 +24,7 @@ public class EmailServiceImpl implements EmailService {
     private com.eventplatform.repository.TicketAttendeeRepository ticketAttendeeRepository;
 
     @Override
+    @Async
     public void sendSimpleEmail(String to, String subject, String body) {
         if (mailSender == null) {
             logFallback(to, subject, body);
@@ -41,6 +43,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @Async
     public void sendEventCreationEmail(Event event, List<String> userEmails) {
         if (userEmails == null || userEmails.isEmpty()) return;
         
@@ -78,6 +81,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @Async
     public void sendBookingConfirmationWithPdf(Registration registration) {
         String toEmail = registration.getUser().getEmail();
         String subject = "Ticket Booking Confirmed - " + registration.getEvent().getTitle();
@@ -217,6 +221,7 @@ public class EmailServiceImpl implements EmailService {
         }
     }
     @Override
+    @Async
     public void sendWelcomeEmail(String to, String name) {
         String subject = "Welcome to EventHub, " + name + "! 🎉";
         
