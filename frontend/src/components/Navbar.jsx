@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Ticket } from 'lucide-react';
+import API from '../services/api';
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,6 +11,60 @@ function Navbar() {
   const userJson = localStorage.getItem('user');
   const user = userJson ? JSON.parse(userJson) : null;
   const isAdmin = user && user.roles && user.roles.includes('ROLE_ADMIN');
+
+  // Notification State
+  const [notifications, setNotifications] = useState([]);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const notifRef = useRef(null);
+
+  // Auto-close notifications dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setIsNotifOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const fetchNotifications = async () => {
+    if (!user) return;
+    try {
+      const res = await API.get('/notifications');
+      setNotifications(res.data);
+    } catch (err) {
+      console.error('Failed to fetch notifications:', err);
+    }
+  };
+
+  const markRead = async (id) => {
+    try {
+      await API.post(`/notifications/read/${id}`);
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const markAllRead = async () => {
+    try {
+      await API.post('/notifications/read-all');
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [userJson]);
 
   // Handle logout session clearance
   const handleLogout = () => {
@@ -72,6 +127,66 @@ function Navbar() {
             
             {/* Divider */}
             <span className="h-4 w-px bg-slate-200"></span>
+
+            {/* Notifications Bell Dropdown */}
+            {user && (
+              <div className="relative" ref={notifRef}>
+                <button
+                  onClick={() => setIsNotifOpen(!isNotifOpen)}
+                  className="relative p-1.5 hover:bg-slate-100 text-slate-500 hover:text-indigo-650 rounded-xl transition duration-150 cursor-pointer flex items-center justify-center"
+                >
+                  <span className="sr-only">Notifications</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  {notifications.filter(n => !n.read).length > 0 && (
+                    <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-indigo-600 rounded-full animate-pulse"></span>
+                  )}
+                </button>
+
+                {isNotifOpen && (
+                  <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-150 rounded-2xl shadow-xl z-50 text-left py-2 animate-scale-up">
+                    <div className="flex justify-between items-center px-4 py-2 border-b border-slate-100">
+                      <span className="text-[10px] font-black text-slate-800 uppercase tracking-wider">Alerts Drawer</span>
+                      {notifications.filter(n => !n.read).length > 0 && (
+                        <button
+                          onClick={markAllRead}
+                          className="text-[9px] font-black text-indigo-600 hover:underline uppercase cursor-pointer"
+                        >
+                          Mark all read
+                        </button>
+                      )}
+                    </div>
+                    <div className="max-h-64 overflow-y-auto divide-y divide-slate-50">
+                      {notifications.length > 0 ? (
+                        notifications.map(n => (
+                          <div key={n.id} className={`p-3 transition-colors ${n.read ? 'bg-white' : 'bg-indigo-50/20'}`}>
+                            <p className="text-[11px] font-semibold text-slate-700 leading-normal">{n.message}</p>
+                            <div className="flex justify-between items-center mt-2">
+                              <span className="text-[8px] text-slate-400 font-bold">
+                                {new Date(n.timestamp).toLocaleDateString()} {new Date(n.timestamp).toLocaleTimeString(undefined, {hour: '2-digit', minute:'2-digit'})}
+                              </span>
+                              {!n.read && (
+                                <button
+                                  onClick={() => markRead(n.id)}
+                                  className="text-[8px] font-black text-indigo-650 hover:underline uppercase cursor-pointer"
+                                >
+                                  Mark Read
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-4 text-center text-slate-400 text-[10px] font-bold">
+                          🔔 No notifications found.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* If logged in, show user profile name and Logout button */}
             {user ? (

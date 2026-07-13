@@ -61,6 +61,9 @@ public class Event {
     @Column(name = "total_capacity")
     private Integer totalCapacity = 60;
 
+    @Column(name = "blocked_seats", length = 2000)
+    private String blockedSeats = "";
+
     // Default Constructor: Required by JPA/Hibernate.
     public Event() {
     }
@@ -172,5 +175,13 @@ public class Event {
 
     public void setTotalCapacity(Integer totalCapacity) {
         this.totalCapacity = totalCapacity;
+    }
+
+    public String getBlockedSeats() {
+        return blockedSeats;
+    }
+
+    public void setBlockedSeats(String blockedSeats) {
+        this.blockedSeats = blockedSeats;
     }
 }

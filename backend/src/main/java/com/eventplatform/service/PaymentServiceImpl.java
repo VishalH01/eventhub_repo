@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.List;
+import com.eventplatform.entity.Notification;
+import com.eventplatform.repository.NotificationRepository;
 
 // @Service: Declares this class as a Service Bean managed by Spring IoC container.
 @Service
@@ -24,6 +27,12 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Autowired
     private RegistrationRepository registrationRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private RegistrationService registrationService;
 
     // Inject Razorpay credentials from application.properties
     @Value("${app.razorpay-key-id}")
@@ -40,8 +49,24 @@ public class PaymentServiceImpl implements PaymentService {
         Registration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new RuntimeException("Registration booking not found with ID: " + registrationId));
 
-        // Calculate dynamic price based on the count of selected seats and VIP status
-        double totalPrice = calculateRegistrationPrice(registration);
+        // Prevent double booking before generating order (excluding current registration)
+        if (!"WAITLISTED".equalsIgnoreCase(registration.getStatus()) && !"WAITLISTED_PAID".equalsIgnoreCase(registration.getStatus())) {
+            List<Registration> otherRegs = registrationRepository.findByEventIdAndStatusIn(registration.getEvent().getId(), List.of("PENDING", "CONFIRMED"));
+            if (registration.getSeats() != null) {
+                String[] selectedSeats = registration.getSeats().split(",");
+                for (String seat : selectedSeats) {
+                    boolean alreadyTaken = otherRegs.stream()
+                        .filter(r -> !r.getId().equals(registrationId))
+                        .anyMatch(r -> r.getSeats() != null && java.util.Arrays.asList(r.getSeats().split(",")).contains(seat.trim()));
+                    if (alreadyTaken) {
+                        throw new RuntimeException("Seat " + seat.trim() + " has already been booked by another user! Please select different seats.");
+                    }
+                }
+            }
+        }
+
+        // Calculate dynamic price based on the count of selected seats and VIP status (honoring any promo codes)
+        double totalPrice = registration.getFinalPrice() != null ? registration.getFinalPrice() : calculateRegistrationPrice(registration);
         // Convert to Paise (Razorpay processes amounts in the smallest currency unit: e.g. 1 Rupee = 100 Paise)
         int amountInPaise = (int) (totalPrice * 100);
 
@@ -77,6 +102,9 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
+    @Autowired
+    private EmailService emailService;
+
     // 2. Verify Payment Signature
     @Override
     @Transactional
@@ -84,6 +112,22 @@ public class PaymentServiceImpl implements PaymentService {
         // Step A: Find the registration booking
         Registration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new RuntimeException("Registration booking not found with ID: " + registrationId));
+
+        // Prevent double booking on verification (excluding current registration)
+        if (!"WAITLISTED".equalsIgnoreCase(registration.getStatus()) && !"WAITLISTED_PAID".equalsIgnoreCase(registration.getStatus())) {
+            List<Registration> otherRegs = registrationRepository.findByEventIdAndStatusIn(registration.getEvent().getId(), List.of("PENDING", "CONFIRMED"));
+            if (registration.getSeats() != null) {
+                String[] selectedSeats = registration.getSeats().split(",");
+                for (String seat : selectedSeats) {
+                    boolean alreadyTaken = otherRegs.stream()
+                        .filter(r -> !r.getId().equals(registrationId))
+                        .anyMatch(r -> r.getSeats() != null && java.util.Arrays.asList(r.getSeats().split(",")).contains(seat.trim()));
+                    if (alreadyTaken) {
+                        throw new RuntimeException("Seat " + seat.trim() + " has already been booked by another user! Please select different seats.");
+                    }
+                }
+            }
+        }
 
         boolean isValid = false;
 
@@ -113,8 +157,12 @@ public class PaymentServiceImpl implements PaymentService {
             throw new RuntimeException("Payment signature verification failed! Possible transaction tampering.");
         }
 
-        // Step B: Set registration status to CONFIRMED
-        registration.setStatus("CONFIRMED");
+        // Step B: Set registration status based on waitlist state
+        if ("WAITLISTED".equalsIgnoreCase(registration.getStatus())) {
+            registration.setStatus("WAITLISTED_PAID");
+        } else {
+            registration.setStatus("CONFIRMED");
+        }
         registrationRepository.save(registration);
 
         // Step C: Log transaction and save a new Payment record in our database
@@ -122,13 +170,21 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setRazorpayOrderId(verifyRequest.getRazorpayOrderId());
         payment.setRazorpayPaymentId(verifyRequest.getRazorpayPaymentId());
         payment.setRazorpaySignature(verifyRequest.getRazorpaySignature());
-        double totalPaidAmount = calculateRegistrationPrice(registration);
+        double totalPaidAmount = registration.getFinalPrice() != null ? registration.getFinalPrice() : calculateRegistrationPrice(registration);
         payment.setAmount(totalPaidAmount);
         payment.setStatus("SUCCESS");
         payment.setPaymentDate(LocalDateTime.now());
         payment.setRegistration(registration);
 
         paymentRepository.save(payment);
+
+        // Create an in-app notification for successful payment
+        try {
+            Notification notif = new Notification(registration.getUser(), "Payment successful! Your ticket booking for event '" + registration.getEvent().getTitle() + "' has been confirmed (Registration ID: " + registration.getRegistrationNumber() + "). Pass is sent to your email!");
+            notificationRepository.save(notif);
+        } catch (Exception e) {
+            System.err.println("Failed to save payment confirmation notification: " + e.getMessage());
+        }
 
         // Step D: Populate the transient QR code string immediately for instant UI feedback
         String qrContent = "Registration Code: " + registration.getRegistrationNumber() + "\n" +
@@ -138,6 +194,13 @@ public class PaymentServiceImpl implements PaymentService {
                            "Venue: " + registration.getEvent().getLocation();
         String base64Image = com.eventplatform.util.QrCodeGenerator.generateQrCodeBase64(qrContent, 200, 200);
         registration.setQrCodeBase64(base64Image);
+
+        // Step E: Trigger confirmation email with ticket PDF attachment
+        try {
+            emailService.sendBookingConfirmationWithPdf(registration);
+        } catch (Exception e) {
+            System.err.println("Failed to send ticket confirmation email: " + e.getMessage());
+        }
 
         return registration;
     }

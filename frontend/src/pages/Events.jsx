@@ -6,15 +6,25 @@ import {
   Calendar, 
   MapPin, 
   ArrowRight,
-  Sparkles
+  Sparkles,
+  SlidersHorizontal,
+  Filter,
+  X
 } from 'lucide-react';
 
 function Events() {
   const [events, setEvents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [location, setLocation] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [sortBy, setSortBy] = useState('dateAsc');
 
   const categories = ['All', 'Tech', 'Music', 'Design'];
 
@@ -23,12 +33,19 @@ function Events() {
       setLoading(true);
       setError('');
       try {
-        const response = await API.get('/events', {
-          params: {
-            search: searchTerm,
-            category: selectedCategory
-          }
-        });
+        const params = {
+          search: searchTerm,
+          category: selectedCategory,
+          sortBy: sortBy
+        };
+        
+        if (location.trim() !== '') params.location = location;
+        if (minPrice !== '') params.minPrice = parseFloat(minPrice);
+        if (maxPrice !== '') params.maxPrice = parseFloat(maxPrice);
+        if (startDate) params.startDate = `${startDate}T00:00:00`;
+        if (endDate) params.endDate = `${endDate}T23:59:59`;
+
+        const response = await API.get('/events', { params });
         setEvents(response.data);
       } catch (err) {
         setError('Failed to load events. Make sure the backend server is running.');
@@ -40,10 +57,10 @@ function Events() {
 
     const delayDebounceFn = setTimeout(() => {
       fetchEvents();
-    }, 300);
+    }, 450); // Slightly larger debounce for typing price and location smoothly
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm, selectedCategory]);
+  }, [searchTerm, selectedCategory, location, minPrice, maxPrice, startDate, endDate, sortBy]);
 
   return (
     <div className="relative min-h-[85vh] py-8 max-w-6xl mx-auto px-4 animate-fade-in-up">
@@ -64,15 +81,43 @@ function Events() {
         <div className="flex flex-col gap-5 p-5 bg-white border border-slate-150 shadow-sm rounded-3xl">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             {/* Search Input Box */}
-            <div className="relative flex-1 w-full">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search events by title, description or keywords..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 text-xs md:text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white transition duration-150 font-medium"
-              />
+            <div className="relative flex-1 w-full flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search events by title, description or keywords..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 text-xs md:text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white transition duration-150 font-medium"
+                />
+              </div>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white text-slate-750 font-bold transition duration-150 cursor-pointer"
+              >
+                <option value="dateAsc">🗓️ Date: Soonest First</option>
+                <option value="dateDesc">🗓️ Date: Latest First</option>
+                <option value="priceAsc">💰 Price: Low to High</option>
+                <option value="priceDesc">💰 Price: High to Low</option>
+                <option value="title">🔤 Title: A-Z</option>
+              </select>
+              <button
+                type="button"
+                onClick={() => setShowFilters(!showFilters)}
+                className={`px-4 py-2.5 rounded-xl border flex items-center gap-2 text-xs font-bold transition duration-150 relative ${
+                  showFilters || location || minPrice || maxPrice || startDate || endDate
+                    ? 'bg-indigo-50 border-indigo-200 text-indigo-755 shadow-sm'
+                    : 'bg-white border-slate-200 text-slate-650 hover:bg-slate-50'
+                }`}
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                <span className="hidden sm:inline">Filters</span>
+                {(location || minPrice || maxPrice || startDate || endDate) && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-indigo-650 rounded-full border border-white"></span>
+                )}
+              </button>
             </div>
             
             {/* Category Pill Selection */}
@@ -92,6 +137,86 @@ function Events() {
               ))}
             </div>
           </div>
+
+          {/* Advanced Filter Collapse Box */}
+          {showFilters && (
+            <div className="pt-4 border-t border-slate-150 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-left animate-fade-in-up">
+              {/* Location */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Venue / Location</label>
+                <input
+                  type="text"
+                  placeholder="e.g. New York, Auditorium"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white font-medium text-slate-700"
+                />
+              </div>
+
+              {/* Price Range */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Price Range (₹)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(e.target.value)}
+                    className="w-1/2 px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white font-medium text-slate-700"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(e.target.value)}
+                    className="w-1/2 px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white font-medium text-slate-700"
+                  />
+                </div>
+              </div>
+
+              {/* Start Date */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Start Date</label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white font-medium text-slate-600"
+                />
+              </div>
+
+              {/* End Date */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">End Date</label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white font-medium text-slate-600"
+                />
+              </div>
+
+              {/* Reset Filters Option */}
+              {(location || minPrice || maxPrice || startDate || endDate) && (
+                <div className="sm:col-span-2 md:col-span-4 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLocation('');
+                      setMinPrice('');
+                      setMaxPrice('');
+                      setStartDate('');
+                      setEndDate('');
+                    }}
+                    className="text-xs font-bold text-red-550 hover:text-red-700 flex items-center gap-1.5 cursor-pointer mt-1"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    <span>Clear Active Filters</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Error Alert */}

@@ -10,6 +10,8 @@ function MyRegistrations() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [cancelTargetId, setCancelTargetId] = useState(null);
   const [cancelTargetTitle, setCancelTargetTitle] = useState('');
+  const [cancelTargetDate, setCancelTargetDate] = useState(null);
+  const [cancelTargetStatus, setCancelTargetStatus] = useState('');
 
   // Retrieve user session info from localStorage for checkout prefilling
   const userJson = localStorage.getItem('user');
@@ -422,9 +424,11 @@ function MyRegistrations() {
   };
 
   // Handle cancellation request via custom modal
-  const handleCancelClick = (id, eventTitle) => {
+  const handleCancelClick = (id, eventTitle, eventDate, status) => {
     setCancelTargetId(id);
     setCancelTargetTitle(eventTitle);
+    setCancelTargetDate(eventDate);
+    setCancelTargetStatus(status);
     setShowConfirmModal(true);
   };
 
@@ -469,14 +473,15 @@ function MyRegistrations() {
             const formattedTime = eventDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
             
             // Check if ticket has seat selection or falls back to mock coordinates
-            const hasSeats = reg.seats && reg.seats.trim().length > 0;
+            const isWaitlist = reg.status?.startsWith('WAITLIST') || (reg.seats && reg.seats.toLowerCase().includes('waitlist'));
+            const hasSeats = reg.seats && reg.seats.trim().length > 0 && !isWaitlist;
             const seatList = hasSeats ? reg.seats.split(',') : [];
-            const seatCount = seatList.length;
-            const gateVal = "G" + ((reg.id % 3) + 1);
-            const rowVal = hasSeats ? [...new Set(seatList.map(s => s.split('-')[0].trim()))].join(', ') : String.fromCharCode(65 + (reg.id % 6));
-            const seatVal = hasSeats ? seatList.map(s => s.split('-')[1].trim()).join(', ') : (((reg.id * 13) % 45) + 1).toString();
+            const seatCount = isWaitlist ? 1 : seatList.length;
+            const gateVal = isWaitlist ? "Waitlist" : "G" + ((reg.id % 3) + 1);
+            const rowVal = isWaitlist ? "Waitlist" : (hasSeats ? [...new Set(seatList.map(s => s.split('-')[0].trim()))].join(', ') : String.fromCharCode(65 + (reg.id % 6)));
+            const seatVal = isWaitlist ? "Waitlist" : (hasSeats ? seatList.map(s => s.split('-')[1].trim()).join(', ') : (((reg.id * 13) % 45) + 1).toString());
             const ticketTypeVal = reg.event.price > 499 ? "VIP" : "GENERAL";
-            const totalPrice = (reg.event.price * seatCount).toString();
+            const totalPrice = reg.finalPrice != null ? reg.finalPrice.toString() : (reg.event.price * seatCount).toString();
 
             return (
               <div key={reg.id} className="space-y-3">
@@ -498,20 +503,22 @@ function MyRegistrations() {
                   onPrint={reg.status === 'CONFIRMED' ? () => handleDownloadTicket(reg) : null}
                 />
                 
-                {/* Actions for Pending Booking */}
-                {reg.status === 'PENDING' && (
+                {/* Actions for Pending, Confirmed, and Waitlist Bookings */}
+                {(reg.status === 'PENDING' || reg.status === 'CONFIRMED' || reg.status === 'WAITLISTED' || reg.status === 'WAITLISTED_PAID') && (
                   <div className="flex gap-2.5 justify-end max-w-4xl mx-auto px-1">
+                    {(reg.status === 'PENDING' || reg.status === 'WAITLISTED') && (
+                      <button
+                        onClick={() => handlePaymentClick(reg.id, reg.event)}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition cursor-pointer"
+                      >
+                        {reg.status === 'WAITLISTED' ? 'Pay Upfront & Join Waitlist' : 'Pay Now (Razorpay)'}
+                      </button>
+                    )}
                     <button
-                      onClick={() => handlePaymentClick(reg.id, reg.event)}
-                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition"
+                      onClick={() => handleCancelClick(reg.id, reg.event.title, reg.event.date, reg.status)}
+                      className="px-4 py-2 border border-red-200 hover:bg-red-50 text-red-600 text-xs font-bold rounded-lg transition cursor-pointer"
                     >
-                      Pay Now (Razorpay)
-                    </button>
-                    <button
-                      onClick={() => handleCancelClick(reg.id, reg.event.title)}
-                      className="px-4 py-2 border border-red-200 hover:bg-red-50 text-red-600 text-xs font-bold rounded-lg transition"
-                    >
-                      Cancel Booking
+                      {reg.status.startsWith('WAITLISTED') ? 'Leave Waitlist' : 'Cancel Booking'}
                     </button>
                   </div>
                 )}
@@ -533,33 +540,68 @@ function MyRegistrations() {
       )}
 
       {/* Glassmorphic Centered Confirmation Modal */}
-      {showConfirmModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-md w-full p-6">
-            <h3 className="text-lg font-bold text-slate-800">Cancel Registration Booking</h3>
-            <p className="mt-3 text-slate-500 text-sm leading-relaxed">
-              Are you sure you want to cancel your booking for <strong className="text-slate-800">"{cancelTargetTitle}"</strong>? This will release your seat reservation.
-            </p>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => setShowConfirmModal(false)}
-                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-bold rounded-xl transition"
-              >
-                No, Keep Booking
-              </button>
-              <button
-                onClick={async () => {
-                  setShowConfirmModal(false);
-                  await executeCancel(cancelTargetId);
-                }}
-                className="px-4 py-2 bg-red-600 hover:bg-red-750 text-white text-xs font-bold rounded-xl shadow-md transition"
-              >
-                Yes, Cancel Booking
-              </button>
+      {showConfirmModal && (() => {
+        const getRefundPreview = () => {
+          if (cancelTargetStatus === 'WAITLISTED_PAID') {
+            return { pct: 95, msg: "Refund Eligible: A 95% refund will be processed automatically. A 5% platform fee will be deducted for leaving the waitlist queue." };
+          }
+          if (cancelTargetStatus !== 'CONFIRMED' || !cancelTargetDate) return null;
+          const eventTime = new Date(cancelTargetDate).getTime();
+          const now = Date.now();
+          const diffHours = (eventTime - now) / (1000 * 60 * 60);
+
+          if (diffHours > 48) {
+            return { pct: 100, msg: "Refund Eligible: 100% full refund will be processed automatically." };
+          } else if (diffHours >= 24) {
+            return { pct: 50, msg: "Refund Eligible: 50% partial refund will be processed automatically." };
+          } else {
+            return { pct: 0, msg: "No Refund: Cancellations within 24 hours of the event are non-refundable." };
+          }
+        };
+        const refundPreview = getRefundPreview();
+
+        return (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-md w-full p-6 text-left">
+              <h3 className="text-lg font-bold text-slate-800 text-left">
+                {cancelTargetStatus.startsWith('WAITLISTED') ? 'Leave Waitlist Queue' : 'Cancel Registration Booking'}
+              </h3>
+              <p className="mt-3 text-slate-500 text-sm leading-relaxed text-left">
+                {cancelTargetStatus.startsWith('WAITLISTED') 
+                  ? `Are you sure you want to cancel your waitlist entry for "${cancelTargetTitle}"?`
+                  : `Are you sure you want to cancel your booking for "${cancelTargetTitle}"? This will release your seat reservation coordinates.`
+                }
+              </p>
+              {refundPreview && (
+                <div className={`mt-3.5 p-3 rounded-xl border text-xs font-semibold leading-relaxed ${
+                  refundPreview.pct >= 95 ? 'bg-emerald-50 border-emerald-100 text-emerald-800' :
+                  refundPreview.pct === 50 ? 'bg-amber-50 border-amber-100 text-amber-800' :
+                  'bg-red-50 border-red-100 text-red-800'
+                }`}>
+                  ℹ️ {refundPreview.msg}
+                </div>
+              )}
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className="px-4 py-2 border border-slate-200 hover:bg-slate-50 bg-white text-slate-600 text-xs font-bold rounded-xl transition cursor-pointer"
+                >
+                  No, Keep Booking
+                </button>
+                <button
+                  onClick={async () => {
+                    setShowConfirmModal(false);
+                    await executeCancel(cancelTargetId);
+                  }}
+                  className="px-4 py-2 bg-red-650 hover:bg-red-700 bg-red-600 text-white text-xs font-bold rounded-xl shadow-md transition cursor-pointer"
+                >
+                  {cancelTargetStatus.startsWith('WAITLISTED') ? 'Yes, Leave Waitlist' : 'Yes, Cancel Booking'}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

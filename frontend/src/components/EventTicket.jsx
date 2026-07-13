@@ -35,12 +35,29 @@ function EventTicket({
       case 'CONFIRMED':
       case 'PAID':
         return 'bg-emerald-50 text-emerald-700 border border-emerald-100';
+      case 'WAITLISTED_PAID':
+        return 'bg-indigo-50 text-indigo-700 border border-indigo-100';
+      case 'WAITLISTED':
       case 'PENDING':
         return 'bg-amber-50 text-amber-700 border border-amber-100';
       case 'FAILED':
         return 'bg-red-50 text-red-700 border border-red-100';
       default:
         return 'bg-slate-50 text-slate-700 border border-slate-100';
+    }
+  };
+
+  const getStatusLabel = (status) => {
+    switch (status?.toUpperCase()) {
+      case 'CONFIRMED':
+      case 'PAID':
+        return 'Paid';
+      case 'WAITLISTED':
+        return 'Waitlist Unpaid';
+      case 'WAITLISTED_PAID':
+        return 'Waitlist Active';
+      default:
+        return status;
     }
   };
 
@@ -225,7 +242,7 @@ function EventTicket({
           {/* Payment Status Indicator */}
           <div className="mt-3">
             <span className={`inline-block px-3.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${getStatusStyle(paymentStatus)}`}>
-              {paymentStatus === 'CONFIRMED' ? 'Paid' : paymentStatus}
+              {getStatusLabel(paymentStatus)}
             </span>
           </div>
         </div>

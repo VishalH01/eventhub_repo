@@ -10,7 +10,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ArrayList;
 
 // @Entity: Maps this Java class to the "registrations" database table.
 @Entity
@@ -61,6 +65,18 @@ public class Registration {
 
     @Column(name = "seats")
     private String seats;
+
+    @Column(name = "coupon_code")
+    private String couponCode;
+
+    @Column(name = "discount_amount")
+    private Double discountAmount = 0.0;
+
+    @Column(name = "final_price")
+    private Double finalPrice;
+
+    @OneToMany(mappedBy = "registration", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TicketAttendee> attendees = new ArrayList<>();
 
     // Default Constructor: Required by JPA/Hibernate.
     public Registration() {
@@ -153,5 +169,37 @@ public class Registration {
 
     public void setSeats(String seats) {
         this.seats = seats;
+    }
+
+    public String getCouponCode() {
+        return couponCode;
+    }
+
+    public void setCouponCode(String couponCode) {
+        this.couponCode = couponCode;
+    }
+
+    public Double getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(Double discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public Double getFinalPrice() {
+        return finalPrice;
+    }
+
+    public void setFinalPrice(Double finalPrice) {
+        this.finalPrice = finalPrice;
+    }
+
+    public List<TicketAttendee> getAttendees() {
+        return attendees;
+    }
+
+    public void setAttendees(List<TicketAttendee> attendees) {
+        this.attendees = attendees;
     }
 }

@@ -17,4 +17,7 @@ public interface AuthService {
     // - Input: LoginRequest DTO containing email and raw password.
     // - Returns: AuthResponse DTO containing JWT token and basic user details on success.
     AuthResponse login(LoginRequest loginRequest);
+
+    // Handles Google OAuth2 SSO authentication.
+    AuthResponse googleLogin(String googleIdToken);
 }

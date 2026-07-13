@@ -38,6 +38,9 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
+    @Autowired
+    private EmailService emailService;
+
     // 1. User Registration Logic
     @Override
     public String register(RegisterRequest registerRequest) {
@@ -68,6 +71,13 @@ public class AuthServiceImpl implements AuthService {
 
         // Step F: Save the User entity. JPA automatically inserts records in both 'users' and the junction 'user_roles' tables.
         userRepository.save(user);
+
+        // Step G: Trigger welcome email
+        try {
+            emailService.sendWelcomeEmail(user.getEmail(), user.getName());
+        } catch (Exception e) {
+            System.err.println("Failed to send welcome email: " + e.getMessage());
+        }
 
         return "User registered successfully!";
     }
@@ -101,5 +111,71 @@ public class AuthServiceImpl implements AuthService {
 
         // Step E: Return the AuthResponse containing the JWT token and user profile details.
         return new AuthResponse(token, user.getEmail(), user.getName(), roles);
+    }
+
+    // 3. Google OAuth2 SSO Authentication Logic
+    @Override
+    public AuthResponse googleLogin(String googleIdToken) {
+        try {
+            com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier verifier =
+                new com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier.Builder(
+                    new com.google.api.client.http.javanet.NetHttpTransport(),
+                    new com.google.api.client.json.gson.GsonFactory()
+                ).build();
+
+            com.google.api.client.googleapis.auth.oauth2.GoogleIdToken idToken = verifier.verify(googleIdToken);
+            if (idToken == null) {
+                throw new RuntimeException("Invalid Google ID Token signature!");
+            }
+
+            com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload payload = idToken.getPayload();
+            String email = payload.getEmail();
+            String name = (String) payload.get("name");
+
+            // Check if the user already exists in our database
+            java.util.Optional<User> userOpt = userRepository.findByEmail(email);
+            User user;
+            if (userOpt.isPresent()) {
+                user = userOpt.get();
+            } else {
+                // Auto-register the Google user in our system
+                String randomPassword = passwordEncoder.encode(java.util.UUID.randomUUID().toString());
+                user = new User(name, email, randomPassword);
+                
+                Role defaultRole = roleRepository.findByName("ROLE_USER")
+                        .orElseThrow(() -> new RuntimeException("Default User Role not found in database."));
+                user.getRoles().add(defaultRole);
+                userRepository.save(user);
+
+                // Trigger welcome email for new Google user
+                try {
+                    emailService.sendWelcomeEmail(email, name);
+                } catch (Exception ex) {
+                    System.err.println("Failed to send Google welcome email: " + ex.getMessage());
+                }
+            }
+
+            // Create Spring Security Authentication object dynamically for the verified user
+            UsernamePasswordAuthenticationToken authenticationToken = 
+                new UsernamePasswordAuthenticationToken(email, null, 
+                    user.getRoles().stream()
+                        .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority(role.getName()))
+                        .collect(Collectors.toList())
+                );
+
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+            // Generate our own local EventHub JWT token
+            String localToken = tokenProvider.generateToken(authenticationToken);
+
+            List<String> roles = user.getRoles().stream()
+                    .map(Role::getName)
+                    .collect(Collectors.toList());
+
+            return new AuthResponse(localToken, user.getEmail(), user.getName(), roles);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Google Authentication failed: " + e.getMessage(), e);
+        }
     }
 }

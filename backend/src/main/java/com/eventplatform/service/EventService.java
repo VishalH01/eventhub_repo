@@ -18,6 +18,6 @@ public interface EventService {
     // Retrieves details of a specific event.
     Event getEventById(Long id);
 
-    // Retrieves all events matching the optional search and category filters.
-    List<Event> getAllEvents(String search, String category);
+    // Retrieves all events matching the optional search, category, location, price, and date filters, sorted by choice.
+    List<Event> getAllEvents(String search, String category, String location, Double minPrice, Double maxPrice, java.time.LocalDateTime startDate, java.time.LocalDateTime endDate, String sortBy);
 }

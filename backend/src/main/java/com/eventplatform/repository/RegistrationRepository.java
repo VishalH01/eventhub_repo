@@ -20,4 +20,6 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     boolean existsByUserEmailAndEventId(String email, Long eventId);
 
     List<Registration> findByEventIdAndStatusIn(Long eventId, List<String> statuses);
+
+    List<Registration> findByEventIdAndStatusOrderByRegistrationDateAsc(Long eventId, String status);
 }

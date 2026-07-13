@@ -20,6 +20,8 @@ public class RegistrationController {
 
     public static class SeatBookingRequest {
         private List<String> seats;
+        private String couponCode;
+        private List<com.eventplatform.service.RegistrationService.AttendeeDTO> attendees;
 
         public List<String> getSeats() {
             return seats;
@@ -27,6 +29,22 @@ public class RegistrationController {
 
         public void setSeats(List<String> seats) {
             this.seats = seats;
+        }
+
+        public String getCouponCode() {
+            return couponCode;
+        }
+
+        public void setCouponCode(String couponCode) {
+            this.couponCode = couponCode;
+        }
+
+        public List<com.eventplatform.service.RegistrationService.AttendeeDTO> getAttendees() {
+            return attendees;
+        }
+
+        public void setAttendees(List<com.eventplatform.service.RegistrationService.AttendeeDTO> attendees) {
+            this.attendees = attendees;
         }
     }
 
@@ -39,7 +57,7 @@ public class RegistrationController {
             Principal principal) {
         try {
             String email = principal.getName(); // Extract logged-in user's email
-            Registration registration = registrationService.bookEvent(eventId, email, request.getSeats());
+            Registration registration = registrationService.bookEvent(eventId, email, request.getSeats(), request.getCouponCode(), request.getAttendees());
             return new ResponseEntity<>(registration, HttpStatus.CREATED);
         } catch (RuntimeException e) {
             // Return bad request error (e.g. duplicate bookings or seat already taken)

@@ -1,6 +1,7 @@
 package com.eventplatform.repository;
 
 import com.eventplatform.entity.Event;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,8 +21,22 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e FROM Event e WHERE " +
            "(LOWER(e.title) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            " LOWER(e.description) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
-           "(:category = 'All' OR e.category = :category)")
-    List<Event> searchAndFilterEvents(@Param("search") String search, @Param("category") String category);
+           "(:category = 'All' OR e.category = :category) AND " +
+           "(:location IS NULL OR :location = '' OR LOWER(e.location) LIKE LOWER(CONCAT('%', :location, '%'))) AND " +
+           "(:minPrice IS NULL OR e.price >= :minPrice) AND " +
+           "(:maxPrice IS NULL OR e.price <= :maxPrice) AND " +
+           "(:startDate IS NULL OR e.date >= :startDate) AND " +
+           "(:endDate IS NULL OR e.date <= :endDate)")
+    List<Event> searchAndFilterEvents(
+            @Param("search") String search,
+            @Param("category") String category,
+            @Param("location") String location,
+            @Param("minPrice") Double minPrice,
+            @Param("maxPrice") Double maxPrice,
+            @Param("startDate") java.time.LocalDateTime startDate,
+            @Param("endDate") java.time.LocalDateTime endDate,
+            Sort sort
+    );
 
     boolean existsByTitle(String title);
 }

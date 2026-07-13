@@ -72,6 +72,11 @@ public class SecurityConfig {
                 // Allow public access to read (GET) event listings
                 .requestMatchers(HttpMethod.GET, "/api/events/**").permitAll()
                 
+                // Allow authenticated users to join, leave, or check waitlist status
+                .requestMatchers(HttpMethod.POST, "/api/events/*/waitlist").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/events/*/waitlist").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/events/*/waitlist/status").authenticated()
+                
                 // Restrict modifying events (POST, PUT, DELETE) strictly to ADMIN users
                 .requestMatchers(HttpMethod.POST, "/api/events/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/events/**").hasRole("ADMIN")
